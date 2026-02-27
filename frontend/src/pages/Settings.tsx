@@ -2,6 +2,27 @@ import { useEffect, useState } from 'react';
 import { getSettings, updateSettings } from '../api';
 import type { Settings as SettingsType } from '../types';
 
+const ADAPTER_DETAILS: Record<string, { label: string; description: string; color: string; detail: string }> = {
+  mock: {
+    label: 'MOCK',
+    description: 'Deterministic simulated outcomes',
+    color: 'bg-yellow-400',
+    detail: 'No real funds moved. Predictable demo scenarios: instant success, retry-then-success, failure, queued.',
+  },
+  circle: {
+    label: 'CIRCLE',
+    description: 'Circle Gateway + Circle Wallets API',
+    color: 'bg-blue-500',
+    detail: 'Real USDC payouts via Circle Programmable Wallets. Circle Gateway handles cross-chain routing via CCTP. Requires CIRCLE_API_KEY + CIRCLE_WALLET_ID.',
+  },
+  arc: {
+    label: 'ARC',
+    description: 'Arc Bridge Kit (Circle L1 + CCTP)',
+    color: 'bg-green-500',
+    detail: "USDC bridging to Arc (Circle's L1 blockchain) via Circle CCTP V2. Arc testnet: chainId=5042002, CCTP domain=26. Requires ARC_API_KEY (or CIRCLE_API_KEY).",
+  },
+};
+
 export default function Settings() {
   const [settings, setSettings] = useState<SettingsType | null>(null);
   const [saving, setSaving] = useState(false);
@@ -25,6 +46,8 @@ export default function Settings() {
     return <div className="text-gray-400 py-10 text-center">Loading settings...</div>;
   }
 
+  const activeDetail = ADAPTER_DETAILS[settings.adapter_mode] ?? ADAPTER_DETAILS.mock;
+
   return (
     <div className="space-y-6 max-w-2xl">
       <h2 className="text-2xl font-bold">Settings</h2>
@@ -33,30 +56,99 @@ export default function Settings() {
       <div className="bg-white rounded-xl shadow-sm border p-6 space-y-4">
         <h3 className="font-semibold text-lg">Adapter Mode</h3>
         <p className="text-sm text-gray-500">
-          Controls whether payouts are executed through the mock adapter (simulated) or a real integration.
+          Controls whether payouts are executed through the mock adapter (simulated),
+          Circle Gateway (real USDC via Circle Wallets), or Arc Bridge Kit (USDC to Arc L1 via CCTP).
         </p>
         <div className="flex gap-3">
-          {['mock', 'circle', 'arc'].map(mode => (
+          {Object.entries(ADAPTER_DETAILS).map(([mode, info]) => (
             <button
               key={mode}
               onClick={() => handleModeChange(mode)}
               disabled={saving}
-              className={`px-5 py-3 rounded-lg border-2 text-sm font-medium transition-colors
+              className={`flex-1 px-4 py-3 rounded-lg border-2 text-sm font-medium transition-colors text-left
                 ${settings.adapter_mode === mode
                   ? 'border-blue-500 bg-blue-50 text-blue-800'
                   : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'}`}
             >
               <div className="flex items-center gap-2">
-                <span className={`w-3 h-3 rounded-full ${mode === 'mock' ? 'bg-yellow-400' : 'bg-green-400'}`} />
-                <span className="uppercase font-bold">{mode}</span>
+                <span className={`w-3 h-3 rounded-full ${info.color}`} />
+                <span className="uppercase font-bold">{info.label}</span>
               </div>
-              <div className="text-xs mt-1 text-gray-400">
-                {mode === 'mock' ? 'Deterministic simulated outcomes' :
-                 mode === 'circle' ? 'Circle Gateway API' :
-                 'Arc Bridge Kit API'}
-              </div>
+              <div className="text-xs mt-1 text-gray-400">{info.description}</div>
             </button>
           ))}
+        </div>
+        <div className="bg-gray-50 rounded-lg p-3 text-xs text-gray-600">
+          <span className="font-semibold">{activeDetail.label}: </span>
+          {activeDetail.detail}
+        </div>
+      </div>
+
+      {/* Circle Gateway Integration */}
+      <div className="bg-white rounded-xl shadow-sm border p-6 space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-lg">Circle Gateway + Circle Wallets</h3>
+          <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+            settings.circle_sandbox
+              ? 'bg-yellow-100 text-yellow-800'
+              : 'bg-green-100 text-green-800'
+          }`}>
+            {settings.circle_sandbox ? 'SANDBOX' : 'PRODUCTION'}
+          </span>
+        </div>
+        <div className="text-xs text-gray-500 space-y-1">
+          <p>
+            <strong>Circle Gateway</strong> provides cross-chain USDC settlement via CCTP (Cross-Chain Transfer Protocol).
+            USDC is natively burned on the source chain and minted on the destination — no wrapping, no synthetics.
+          </p>
+          <p>
+            <strong>Circle Wallets</strong> (Programmable Wallets) hold the treasury USDC and sign transfer transactions.
+            Transfers use <code className="bg-gray-100 px-1 rounded">POST /v1/transfers</code> with your wallet ID as source.
+          </p>
+        </div>
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <ConfigRow
+            label="API Endpoint"
+            value={settings.circle_sandbox ? 'api-sandbox.circle.com/v1' : 'api.circle.com/v1'}
+          />
+          <ConfigRow
+            label="Wallet Configured"
+            value={settings.circle_wallet_configured ? 'Yes (CIRCLE_WALLET_ID set)' : 'No — set CIRCLE_WALLET_ID'}
+            warn={!settings.circle_wallet_configured}
+          />
+          <ConfigRow label="API Key" value="Set via CIRCLE_API_KEY env var" />
+          <ConfigRow label="Currency" value="USDC (represented as USD in API)" />
+          <ConfigRow label="Chains" value="ETH, MATIC, ARB, SOL, AVAX, BASE, ARC" />
+          <ConfigRow label="Idempotency" value="UUID per transfer (retry-safe)" />
+        </div>
+      </div>
+
+      {/* Arc Bridge Kit Integration */}
+      <div className="bg-white rounded-xl shadow-sm border p-6 space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-lg">Arc Bridge Kit (Circle L1)</h3>
+          <span className="text-xs px-2 py-1 rounded-full font-medium bg-purple-100 text-purple-800">
+            {settings.arc_chain}
+          </span>
+        </div>
+        <div className="text-xs text-gray-500 space-y-1">
+          <p>
+            <strong>Arc</strong> is Circle's EVM-compatible Layer-1 blockchain for stablecoin finance.
+            It uses USDC as the native gas token and achieves sub-second finality via Malachite BFT consensus.
+          </p>
+          <p>
+            <strong>Bridge Kit</strong> abstracts CCTP V2 bridging to Arc. The pattern:
+            Approve → Burn (source chain) → Attest (Circle Iris) → Mint (Arc).
+            The backend routes Arc transfers via Circle's API with the Arc chain identifier.
+          </p>
+        </div>
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <ConfigRow label="Chain" value={`${settings.arc_chain} (chainId: 5042002)`} />
+          <ConfigRow label="CCTP Domain" value="26 (Arc testnet)" />
+          <ConfigRow label="USDC on Arc" value="0x3600...0000 (native)" />
+          <ConfigRow label="Gas Token" value="USDC (no ETH needed)" />
+          <ConfigRow label="API Key" value="Set via ARC_API_KEY (or CIRCLE_API_KEY)" />
+          <ConfigRow label="Source Wallet" value="Set via ARC_SOURCE_WALLET env var" />
         </div>
       </div>
 
@@ -94,10 +186,24 @@ export default function Settings() {
       <div className="bg-amber-50 border border-amber-200 rounded-xl p-5">
         <h4 className="font-semibold text-amber-800 text-sm">About Real vs Simulated</h4>
         <ul className="mt-2 text-sm text-amber-700 space-y-1">
-          <li><strong>SIMULATED</strong> — Payout is executed through the mock adapter with deterministic demo outcomes. No real funds are moved.</li>
-          <li><strong>REAL</strong> — Payout is executed through Circle or Arc API with actual USDC transfers on-chain.</li>
+          <li><strong>SIMULATED</strong> — Mock adapter with deterministic demo outcomes. No real funds moved. Safe for demos.</li>
+          <li><strong>REAL</strong> — Circle or Arc adapter executing actual USDC transfers on-chain via Circle's API.</li>
         </ul>
+        <p className="mt-2 text-xs text-amber-600">
+          Env vars for real mode: <code className="bg-amber-100 px-1 rounded">CIRCLE_API_KEY</code>,{' '}
+          <code className="bg-amber-100 px-1 rounded">CIRCLE_WALLET_ID</code>,{' '}
+          <code className="bg-amber-100 px-1 rounded">CIRCLE_SANDBOX=false</code> for production.
+        </p>
       </div>
+    </div>
+  );
+}
+
+function ConfigRow({ label, value, warn }: { label: string; value: string; warn?: boolean }) {
+  return (
+    <div className="bg-gray-50 rounded p-2">
+      <div className="text-xs text-gray-400 uppercase tracking-wide">{label}</div>
+      <div className={`text-xs font-mono mt-0.5 ${warn ? 'text-red-600' : 'text-gray-700'}`}>{value}</div>
     </div>
   );
 }

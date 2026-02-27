@@ -13,4 +13,7 @@ async def health_check():
         status="healthy",
         adapter_mode=settings.ADAPTER_MODE,
         version="1.0.0",
+        circle_configured=bool(settings.CIRCLE_API_KEY),
+        arc_configured=bool(settings.ARC_API_KEY or settings.CIRCLE_API_KEY),
+        circle_sandbox=settings.CIRCLE_SANDBOX,
     )

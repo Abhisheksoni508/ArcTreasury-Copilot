@@ -5,6 +5,7 @@ const CHAIN_COLORS: Record<string, string> = {
   solana: 'bg-teal-100 text-teal-800',
   avalanche: 'bg-red-100 text-red-700',
   base: 'bg-blue-100 text-blue-800',
+  arc: 'bg-emerald-100 text-emerald-800',  // Circle's Arc L1 blockchain
 };
 
 export default function ChainBadge({ chain }: { chain: string }) {

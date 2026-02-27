@@ -104,6 +104,9 @@ export interface HealthResponse {
   status: string;
   adapter_mode: string;
   version: string;
+  circle_configured: boolean;
+  arc_configured: boolean;
+  circle_sandbox: boolean;
 }
 
 export interface Settings {
@@ -112,4 +115,7 @@ export interface Settings {
   policy_velocity_limit: number;
   supported_chains: string[];
   treasury_wallet: string;
+  circle_sandbox: boolean;
+  circle_wallet_configured: boolean;
+  arc_chain: string;
 }

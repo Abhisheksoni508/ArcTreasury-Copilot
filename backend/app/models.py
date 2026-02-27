@@ -179,6 +179,9 @@ class HealthResponse(BaseModel):
     status: str = "healthy"
     adapter_mode: str
     version: str = "1.0.0"
+    circle_configured: bool = False
+    arc_configured: bool = False
+    circle_sandbox: bool = True
 
 
 class SettingsResponse(BaseModel):
@@ -187,3 +190,6 @@ class SettingsResponse(BaseModel):
     policy_velocity_limit: int
     supported_chains: list[str]
     treasury_wallet: str
+    circle_sandbox: bool = True
+    circle_wallet_configured: bool = False
+    arc_chain: str = "ARC-TESTNET"

@@ -15,6 +15,9 @@ async def get_settings():
         policy_velocity_limit=settings.POLICY_VELOCITY_LIMIT,
         supported_chains=settings.SUPPORTED_CHAINS,
         treasury_wallet=settings.TREASURY_WALLET,
+        circle_sandbox=settings.CIRCLE_SANDBOX,
+        circle_wallet_configured=bool(settings.CIRCLE_WALLET_ID),
+        arc_chain=settings.ARC_CHAIN,
     )
 
 
@@ -33,4 +36,7 @@ async def update_settings(req: SettingsUpdateRequest):
         policy_velocity_limit=settings.POLICY_VELOCITY_LIMIT,
         supported_chains=settings.SUPPORTED_CHAINS,
         treasury_wallet=settings.TREASURY_WALLET,
+        circle_sandbox=settings.CIRCLE_SANDBOX,
+        circle_wallet_configured=bool(settings.CIRCLE_WALLET_ID),
+        arc_chain=settings.ARC_CHAIN,
     )
