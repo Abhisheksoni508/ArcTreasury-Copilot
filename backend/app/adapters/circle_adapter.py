@@ -1,64 +1,88 @@
-"""Circle adapter — real USDC payouts via Circle Gateway + Circle Wallets API.
+"""Circle W3S adapter — real USDC payouts via Circle Developer-Controlled Wallets.
 
-Circle Gateway (CCTP): Cross-chain USDC transfer via burn-and-mint.
-Circle Wallets: Programmable wallet transfers for same-chain USDC payouts.
+Uses Circle's Web3 Services (W3S) Programmable Wallets API:
+  Transfer:    POST /v1/w3s/developer/transactions/transfer
+  Status:      GET  /v1/w3s/transactions/{id}
+  Public key:  GET  /v1/w3s/config/entity/publicKey
+  Token list:  GET  /v1/w3s/tokens
+
+Every request to the W3S API for developer-controlled wallets requires an
+entitySecretCiphertext — the 32-byte entity secret encrypted with Circle's
+RSA public key (RSA-OAEP / SHA-256), then Base64-encoded.
 
 Docs:
-  - Circle Gateway: https://developers.circle.com/circle-mint/docs/circle-gateway
-  - Circle Wallets: https://developers.circle.com/w3s/docs/overview
-  - CCTP: https://developers.circle.com/stablecoins/docs/cctp-getting-started
+  - W3S overview:   https://developers.circle.com/w3s/docs/overview
+  - Transfer API:   https://developers.circle.com/w3s/reference/createtransaction
+  - Entity secret:  https://developers.circle.com/w3s/developer-controlled-create-your-first-wallet
 
 Configuration:
   CIRCLE_API_KEY       — Your Circle API key (required)
-  CIRCLE_WALLET_ID     — Source treasury wallet ID in Circle (required for real transfers)
-  CIRCLE_ENTITY_SECRET — Entity secret for developer-controlled wallets (optional)
-  CIRCLE_SANDBOX       — "true" for sandbox (api-sandbox.circle.com), "false" for production
+  CIRCLE_WALLET_ID     — Developer-controlled wallet UUID from Circle console (required)
+  CIRCLE_ENTITY_SECRET — 32-byte hex entity secret registered on Circle (required)
+  CIRCLE_SANDBOX       — "true" for sandbox (api-sandbox.circle.com), default true
 """
 
 import httpx
 import uuid
+import base64
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import padding
 from app.adapters.base import LegResult
 from app.config import settings
 
 
-# Circle's chain identifiers (as used in Circle API)
-# Ref: https://developers.circle.com/circle-mint/circle-api-resources
-CHAIN_MAP = {
+# Circle W3S blockchain identifiers
+# Sandbox uses testnet chains; production uses mainnet chains
+CHAIN_MAP_SANDBOX = {
+    "ethereum":  "ETH-SEPOLIA",
+    "polygon":   "MATIC-AMOY",
+    "arbitrum":  "ARB-SEPOLIA",
+    "solana":    "SOL-DEVNET",
+    "avalanche": "AVAX-FUJI",
+    "base":      "BASE-SEPOLIA",
+    "arc":       "ARC-TESTNET",
+}
+
+CHAIN_MAP_PROD = {
     "ethereum":  "ETH",
     "polygon":   "MATIC",
     "arbitrum":  "ARB",
     "solana":    "SOL",
     "avalanche": "AVAX",
     "base":      "BASE",
-    "arc":       settings.ARC_CHAIN,  # Circle's Arc L1 blockchain
+    "arc":       settings.ARC_CHAIN,
 }
 
 
 class CircleAdapter:
     """
-    Executes USDC payouts via Circle Gateway and Circle Wallets API.
+    Executes USDC payouts via Circle's W3S Developer-Controlled Wallets API.
 
-    For same-chain transfers: POST /v1/transfers (wallet → blockchain address)
-    For cross-chain transfers: Circle uses CCTP automatically when chain differs
-                               from source wallet chain.
+    Each transfer call:
+      1. Fetches Circle's RSA public key
+      2. Encrypts the entity secret (RSA-OAEP / SHA-256) → entitySecretCiphertext
+      3. Looks up the USDC token ID for the target blockchain
+      4. POSTs to /v1/w3s/developer/transactions/transfer
 
-    Sandbox: api-sandbox.circle.com — use for testing (no real funds)
-    Production: api.circle.com — requires live API key and real wallet
+    Requires CIRCLE_API_KEY, CIRCLE_WALLET_ID, and CIRCLE_ENTITY_SECRET in .env.
+    CIRCLE_WALLET_ID is the UUID shown in Circle console (not the 0x blockchain address).
     """
 
     def __init__(self):
         self.api_key = settings.CIRCLE_API_KEY
-        self.wallet_id = settings.CIRCLE_WALLET_ID or "treasury-demo"
+        self.wallet_id = settings.CIRCLE_WALLET_ID
+        self.entity_secret = settings.CIRCLE_ENTITY_SECRET
 
     @property
     def base_url(self) -> str:
-        return settings.CIRCLE_API_BASE
+        if settings.CIRCLE_SANDBOX:
+            return "https://api-sandbox.circle.com/v1/w3s"
+        return "https://api.circle.com/v1/w3s"
 
     def name(self) -> str:
         return "circle"
 
     def is_simulated(self) -> bool:
-        # Simulated if no API key configured
         return not bool(self.api_key)
 
     def _headers(self) -> dict:
@@ -67,6 +91,56 @@ class CircleAdapter:
             "Content-Type": "application/json",
         }
 
+    async def _get_entity_secret_ciphertext(self) -> str:
+        """
+        Encrypt the entity secret with Circle's RSA public key.
+
+        Fetches Circle's current public key, then encrypts the 32-byte entity
+        secret using RSA-OAEP with SHA-256 and returns the Base64-encoded result.
+        The output is always 684 characters long.
+        """
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(
+                f"{self.base_url}/config/entity/publicKey",
+                headers=self._headers(),
+                timeout=15.0,
+            )
+            resp.raise_for_status()
+            public_key_pem = resp.json()["data"]["publicKey"]
+
+        entity_secret_bytes = bytes.fromhex(self.entity_secret)
+        public_key = serialization.load_pem_public_key(public_key_pem.encode())
+        ciphertext = public_key.encrypt(
+            entity_secret_bytes,
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None,
+            ),
+        )
+        return base64.b64encode(ciphertext).decode()
+
+    async def _get_usdc_token_id(self, blockchain: str) -> str | None:
+        """
+        Look up the USDC token ID for a given blockchain via Circle's tokens API.
+
+        GET /v1/w3s/tokens?blockchain={blockchain}
+        Returns the token UUID needed for the transfer payload.
+        """
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(
+                f"{self.base_url}/tokens",
+                headers=self._headers(),
+                params={"blockchain": blockchain},
+                timeout=15.0,
+            )
+            if resp.status_code == 200:
+                tokens = resp.json().get("data", {}).get("tokens", [])
+                for token in tokens:
+                    if token.get("symbol", "").upper() in ("USDC", "USD"):
+                        return token.get("id")
+        return None
+
     async def execute(self, leg_id: str, recipient_address: str, amount: float,
                       destination_chain: str) -> LegResult:
         if not self.api_key:
@@ -74,39 +148,63 @@ class CircleAdapter:
                 status="FAILED",
                 error_message=(
                     "Circle API key not configured. "
-                    "Set CIRCLE_API_KEY env var. "
+                    "Set CIRCLE_API_KEY in .env. "
                     "Get your key at: https://console.circle.com"
                 ),
                 is_simulated=True,
             )
 
-        circle_chain = CHAIN_MAP.get(destination_chain.lower(), "ETH")
+        if not self.wallet_id:
+            return LegResult(
+                status="FAILED",
+                error_message=(
+                    "Circle wallet ID not configured. "
+                    "Set CIRCLE_WALLET_ID in .env with the UUID from Circle console "
+                    "(Programmable Wallets → your wallet → copy the ID, not the 0x address)."
+                ),
+                is_simulated=False,
+            )
 
-        # POST /v1/transfers — Circle Wallets API transfer
-        # Source: Circle Programmable Wallet (CIRCLE_WALLET_ID)
-        # Destination: blockchain address on target chain
-        # Circle automatically routes cross-chain via CCTP/Gateway when needed
-        payload = {
-            "idempotencyKey": str(uuid.uuid4()),
-            "source": {
-                "type": "wallet",
-                "id": self.wallet_id,
-            },
-            "destination": {
-                "type": "blockchain",
-                "address": recipient_address,
-                "chain": circle_chain,
-            },
-            "amount": {
-                "amount": f"{amount:.2f}",
-                "currency": "USD",  # Circle represents USDC as "USD" in transfers API
-            },
-        }
+        if not self.entity_secret:
+            return LegResult(
+                status="FAILED",
+                error_message=(
+                    "Circle entity secret not configured. "
+                    "Set CIRCLE_ENTITY_SECRET in .env."
+                ),
+                is_simulated=False,
+            )
+
+        chain_map = CHAIN_MAP_SANDBOX if settings.CIRCLE_SANDBOX else CHAIN_MAP_PROD
+        blockchain = chain_map.get(destination_chain.lower(), "ETH-SEPOLIA")
 
         try:
+            entity_secret_ciphertext = await self._get_entity_secret_ciphertext()
+
+            token_id = await self._get_usdc_token_id(blockchain)
+            if not token_id:
+                return LegResult(
+                    status="FAILED",
+                    error_message=(
+                        f"No USDC token found for chain '{blockchain}'. "
+                        f"Verify Circle sandbox supports this chain."
+                    ),
+                    is_simulated=False,
+                )
+
+            payload = {
+                "idempotencyKey": str(uuid.uuid4()),
+                "entitySecretCiphertext": entity_secret_ciphertext,
+                "walletId": self.wallet_id,
+                "amounts": [f"{amount:.2f}"],
+                "destinationAddress": recipient_address,
+                "tokenId": token_id,
+                "feeLevel": "MEDIUM",
+            }
+
             async with httpx.AsyncClient() as client:
                 resp = await client.post(
-                    f"{self.base_url}/transfers",
+                    f"{self.base_url}/developer/transactions/transfer",
                     headers=self._headers(),
                     json=payload,
                     timeout=30.0,
@@ -120,7 +218,8 @@ class CircleAdapter:
                         is_simulated=False,
                     )
                 else:
-                    error_body = resp.json() if resp.headers.get("content-type", "").startswith("application/json") else {}
+                    is_json = resp.headers.get("content-type", "").startswith("application/json")
+                    error_body = resp.json() if is_json else {}
                     error_msg = error_body.get("message", resp.text[:200])
                     return LegResult(
                         status="FAILED",
@@ -136,35 +235,35 @@ class CircleAdapter:
         except Exception as e:
             return LegResult(
                 status="FAILED",
-                error_message=f"Circle API connection error: {str(e)[:200]}",
+                error_message=f"Circle API error: {str(e)[:200]}",
                 is_simulated=True,
             )
 
     async def check_status(self, tx_hash: str) -> LegResult:
-        """Check transfer status via GET /v1/transfers/{id}"""
+        """Check transfer status via GET /v1/w3s/transactions/{id}"""
         if not self.api_key:
             return LegResult(status="FAILED", error_message="No Circle API key configured", is_simulated=True)
 
         try:
             async with httpx.AsyncClient() as client:
                 resp = await client.get(
-                    f"{self.base_url}/transfers/{tx_hash}",
+                    f"{self.base_url}/transactions/{tx_hash}",
                     headers=self._headers(),
                     timeout=15.0,
                 )
                 if resp.status_code == 200:
-                    data = resp.json().get("data", {})
-                    status = data.get("status", "pending")
-                    if status == "complete":
+                    data = resp.json().get("data", {}).get("transaction", {})
+                    state = data.get("state", "INITIATED")
+                    if state == "COMPLETE":
                         return LegResult(status="CONFIRMED", tx_hash=tx_hash, is_simulated=False)
-                    elif status == "failed":
-                        error_code = data.get("errorCode", "Unknown error")
+                    elif state in ("FAILED", "DENIED"):
+                        error_reason = data.get("errorReason", "Unknown error")
                         return LegResult(
                             status="FAILED", tx_hash=tx_hash, is_simulated=False,
-                            error_message=f"Transfer failed: {error_code}",
+                            error_message=f"Transfer failed: {error_reason}",
                         )
                     else:
-                        # "pending" or other intermediate states
+                        # INITIATED, QUEUED, SENT, CONFIRMED (not yet COMPLETE)
                         return LegResult(status="SUBMITTED", tx_hash=tx_hash, is_simulated=False)
                 return LegResult(
                     status="FAILED",
@@ -175,12 +274,11 @@ class CircleAdapter:
             return LegResult(status="FAILED", error_message=str(e)[:200], is_simulated=True)
 
     async def get_wallet_balance(self) -> dict:
-        """Fetch treasury wallet balance from Circle Wallets API.
+        """Fetch treasury wallet balances from Circle W3S API.
 
-        GET /v1/wallets/{wallet_id}/balances
-        Returns: list of token balances (USDC amount on each chain)
+        GET /v1/w3s/wallets/{wallet_id}/balances
         """
-        if not self.api_key or not self.wallet_id or self.wallet_id == "treasury-demo":
+        if not self.api_key or not self.wallet_id:
             return {"error": "Circle wallet not configured", "balances": []}
 
         try:
