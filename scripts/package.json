@@ -1,0 +1,16 @@
+{
+  "name": "arctresury-scripts",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "create-wallet": "node --env-file=../backend/.env --import=tsx create-wallet.ts"
+  },
+  "dependencies": {
+    "@circle-fin/developer-controlled-wallets": "^1.0.0",
+    "tsx": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.0.0"
+  }
+}

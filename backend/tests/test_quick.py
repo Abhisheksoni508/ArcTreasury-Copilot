@@ -53,3 +53,19 @@ def test_unsupported_chain():
     result = evaluate_item("0xSOMEONE", 1000, "fantom", "payroll")
     assert result.decision == "REJECTED"
     assert "not supported" in result.reason.lower()
+
+
+def test_arc_chain_approved():
+    """Arc L1 chain is supported — Circle's Bridge Kit destination."""
+    result = evaluate_item("0xSUCCESS_ARC_005", 5000, "arc", "revenue_split")
+    assert result.decision == "APPROVED"
+    assert result.risk_score < 25
+
+
+def test_arc_chain_policy_pass():
+    """Arc chain is in SUPPORTED_CHAINS — should not trigger chain_supported rule."""
+    result = evaluate_item("0xSOMEADDRESS", 1000, "arc", "payroll")
+    # Chain rule should pass (arc is supported), only slight risk from unknown address
+    chain_rule = next((r for r in result.rules if r.rule_name == "chain_supported"), None)
+    assert chain_rule is not None
+    assert chain_rule.passed is True

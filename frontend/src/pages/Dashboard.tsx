@@ -27,10 +27,26 @@ export default function Dashboard() {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Dashboard</h2>
         {health && (
-          <span className="text-xs text-green-600 flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-green-500" />
-            Backend {health.status} — {health.adapter_mode.toUpperCase()} mode
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-green-600 flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-green-500" />
+              Backend {health.status} — {health.adapter_mode.toUpperCase()} mode
+            </span>
+            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+              health.circle_configured
+                ? 'bg-blue-100 text-blue-700'
+                : 'bg-gray-100 text-gray-500'
+            }`}>
+              Circle {health.circle_configured ? (health.circle_sandbox ? 'Sandbox' : 'Live') : 'Not configured'}
+            </span>
+            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+              health.arc_configured
+                ? 'bg-purple-100 text-purple-700'
+                : 'bg-gray-100 text-gray-500'
+            }`}>
+              Arc {health.arc_configured ? 'Ready' : 'Not configured'}
+            </span>
+          </div>
         )}
       </div>
 

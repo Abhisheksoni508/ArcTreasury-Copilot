@@ -47,16 +47,26 @@ DEMO_ITEMS = [
         "category": "revenue_split",
     },
     {
+        # Arc Bridge Kit demo: USDC bridged to Circle's Arc L1 via CCTP
         "id": "item-005",
+        "recipient_name": "FutureFinance (Arc L1)",
+        "recipient_address": "0xSUCCESS_ARC_005",
+        "amount": 5000.00,
+        "currency": "USDC",
+        "destination_chain": "arc",   # Circle's Arc blockchain
+        "category": "revenue_split",
+    },
+    {
+        "id": "item-006",
         "recipient_name": "Echo Ltd",
-        "recipient_address": "0xNEW_ECHO_005",
+        "recipient_address": "0xNEW_ECHO_006",
         "amount": 18000.00,
         "currency": "USDC",
         "destination_chain": "solana",
         "category": "payroll",
     },
     {
-        "id": "item-006",
+        "id": "item-007",
         "recipient_name": "Fraudster Inc",
         "recipient_address": "0xFAIL_BLOCKLISTED_666",
         "amount": 100000.00,
