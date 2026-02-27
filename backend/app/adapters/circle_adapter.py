@@ -273,6 +273,83 @@ class CircleAdapter:
         except Exception as e:
             return LegResult(status="FAILED", error_message=str(e)[:200], is_simulated=True)
 
+    # ── Developer-Controlled Wallet provisioning ─────────────────────────
+
+    async def create_wallet_set(self, name: str = "ArcTreasury") -> dict:
+        """Create a Circle developer-controlled wallet set.
+
+        POST /v1/w3s/developer/walletSets
+        Returns the new wallet set object with its ``id``.
+        """
+        entity_secret_ciphertext = await self._get_entity_secret_ciphertext()
+        payload = {
+            "idempotencyKey": str(uuid.uuid4()),
+            "entitySecretCiphertext": entity_secret_ciphertext,
+            "name": name,
+        }
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                f"{self.base_url}/developer/walletSets",
+                headers=self._headers(),
+                json=payload,
+                timeout=30.0,
+            )
+            resp.raise_for_status()
+            return resp.json().get("data", {}).get("walletSet", {})
+
+    async def create_wallet(
+        self,
+        wallet_set_id: str,
+        blockchains: list[str] | None = None,
+        name: str = "ArcTreasury Treasury Wallet",
+    ) -> list[dict]:
+        """Create developer-controlled wallet(s) inside a wallet set.
+
+        POST /v1/w3s/developer/wallets
+        ``blockchains`` defaults to ETH-SEPOLIA (sandbox) or ETH (prod).
+        Returns a list of wallet objects, each with ``id`` and ``address``.
+        """
+        if blockchains is None:
+            blockchains = ["ETH-SEPOLIA"] if self.base_url.endswith("sandbox.circle.com/v1/w3s") or "sandbox" in self.base_url else ["ETH"]
+
+        entity_secret_ciphertext = await self._get_entity_secret_ciphertext()
+        payload = {
+            "idempotencyKey": str(uuid.uuid4()),
+            "entitySecretCiphertext": entity_secret_ciphertext,
+            "walletSetId": wallet_set_id,
+            "blockchains": blockchains,
+            "count": 1,
+            "metadata": [{"name": name, "refId": f"arctresury-{uuid.uuid4().hex[:8]}"}],
+        }
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                f"{self.base_url}/developer/wallets",
+                headers=self._headers(),
+                json=payload,
+                timeout=30.0,
+            )
+            resp.raise_for_status()
+            return resp.json().get("data", {}).get("wallets", [])
+
+    async def list_wallets(self, wallet_set_id: str | None = None) -> list[dict]:
+        """List developer-controlled wallets for the entity.
+
+        GET /v1/w3s/wallets
+        Optionally filtered by walletSetId.
+        """
+        params: dict = {}
+        if wallet_set_id:
+            params["walletSetId"] = wallet_set_id
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(
+                f"{self.base_url}/wallets",
+                headers=self._headers(),
+                params=params,
+                timeout=15.0,
+            )
+            resp.raise_for_status()
+            return resp.json().get("data", {}).get("wallets", [])
+
     async def get_wallet_balance(self) -> dict:
         """Fetch treasury wallet balances from Circle W3S API.
 

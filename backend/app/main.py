@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import init_db
-from app.routes import health, settings, seed, batches, policy, review, execution, audit
+from app.routes import health, settings, seed, batches, policy, review, execution, audit, wallets
 
 
 @asynccontextmanager
@@ -39,6 +39,7 @@ app.include_router(policy.router, prefix="/api", tags=["Policy"])
 app.include_router(review.router, prefix="/api", tags=["Review"])
 app.include_router(execution.router, prefix="/api", tags=["Execution"])
 app.include_router(audit.router, prefix="/api", tags=["Audit"])
+app.include_router(wallets.router, prefix="/api", tags=["Wallets"])
 
 
 @app.get("/")
