@@ -6,7 +6,7 @@
     "create-wallet": "node --env-file=../backend/.env --import=tsx create-wallet.ts"
   },
   "dependencies": {
-    "@circle-fin/developer-controlled-wallets": "^1.0.0",
+    "@circle-fin/developer-controlled-wallets": "^10.1.0",
     "tsx": "^4.0.0"
   },
   "devDependencies": {

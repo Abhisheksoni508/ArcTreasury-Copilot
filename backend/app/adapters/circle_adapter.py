@@ -75,8 +75,7 @@ class CircleAdapter:
 
     @property
     def base_url(self) -> str:
-        if settings.CIRCLE_SANDBOX:
-            return "https://api-sandbox.circle.com/v1/w3s"
+        # Circle's unified API: TEST_API_KEY prefix auto-routes to testnet
         return "https://api.circle.com/v1/w3s"
 
     def name(self) -> str:

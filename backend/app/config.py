@@ -32,8 +32,7 @@ class Settings:
 
     @property
     def CIRCLE_API_BASE(self) -> str:
-        if self.CIRCLE_SANDBOX:
-            return "https://api-sandbox.circle.com/v1"
+        # Circle unified API: TEST_API_KEY prefix auto-routes to testnet
         return "https://api.circle.com/v1"
 
     # ── Arc Bridge Kit (Arc L1 Blockchain via Circle CCTP) ───────────────
@@ -59,10 +58,8 @@ class Settings:
 
     @property
     def ARC_API_BASE(self) -> str:
-        # Arc transfers go through Circle's API infrastructure (not api.arc.market)
-        # The Arc network is accessed via Circle's Programmable Wallets API
-        if self.CIRCLE_SANDBOX:
-            return "https://api-sandbox.circle.com/v1"
+        # Arc transfers go through Circle's API infrastructure
+        # Circle unified API: TEST_API_KEY prefix auto-routes to testnet
         return "https://api.circle.com/v1"
 
     # ── Policy thresholds ────────────────────────────────────────────────
