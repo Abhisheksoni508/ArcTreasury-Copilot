@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Package, Search, Zap, Bot, ClipboardList, Settings as SettingsIcon } from 'lucide-react';
+import { LayoutDashboard, Package, Search, Zap, Bot, ClipboardList, Settings as SettingsIcon, Landmark } from 'lucide-react';
 import AnimatedLogo from './AnimatedLogo';
 
 const NAV = [
@@ -8,6 +8,7 @@ const NAV = [
   { to: '/review', label: 'Review Queue', icon: <Search size={18} /> },
   { to: '/execution', label: 'Execution', icon: <Zap size={18} /> },
   { to: '/agent', label: 'Copilot Agent', icon: <Bot size={18} /> },
+  { to: '/treasury', label: 'Treasury & RWA', icon: <Landmark size={18} /> },
   { to: '/audit', label: 'Audit Log', icon: <ClipboardList size={18} /> },
   { to: '/settings', label: 'Settings', icon: <SettingsIcon size={18} /> },
 ];

@@ -92,6 +92,45 @@ async def init_db():
             strategy TEXT,
             timestamp TEXT
         );
+
+        CREATE TABLE IF NOT EXISTS treasury_positions (
+            id TEXT PRIMARY KEY,
+            asset_symbol TEXT NOT NULL,
+            asset_name TEXT NOT NULL,
+            category TEXT NOT NULL,
+            amount_usdc REAL NOT NULL,
+            shares REAL NOT NULL,
+            apy REAL NOT NULL,
+            risk_rating TEXT,
+            status TEXT DEFAULT 'ACTIVE',
+            chain TEXT,
+            tx_hash TEXT,
+            allocated_at TEXT,
+            updated_at TEXT
+        );
+
+        CREATE TABLE IF NOT EXISTS treasury_rebalance_history (
+            id TEXT PRIMARY KEY,
+            reserve_ratio_before REAL,
+            reserve_ratio_after REAL,
+            actions_taken TEXT,
+            triggered_by TEXT,
+            created_at TEXT
+        );
+
+        CREATE TABLE IF NOT EXISTS gateway_transactions (
+            id TEXT PRIMARY KEY,
+            type TEXT NOT NULL,
+            fiat_amount REAL,
+            fiat_currency TEXT,
+            usdc_amount REAL,
+            fee REAL,
+            rail TEXT,
+            status TEXT DEFAULT 'PENDING',
+            bank_instructions TEXT,
+            created_at TEXT,
+            updated_at TEXT
+        );
     """)
 
     await db.commit()

@@ -168,3 +168,137 @@ export interface AgentStrategyInfo {
   max_retries: number;
   loop_interval: number;
 }
+
+// ── Treasury / RWA Types ───────────────────────────────────────────────
+
+export interface TreasuryPosition {
+  id: string;
+  asset_symbol: string;
+  asset_name: string;
+  category: string;
+  amount_usdc: number;
+  shares: number;
+  apy: number;
+  risk_rating: string;
+  status: string;
+  chain: string;
+  tx_hash: string;
+  allocated_at: string;
+  updated_at: string;
+  current_value: number;
+  accrued_yield: number;
+}
+
+export interface TreasuryHealth {
+  overall_score: number;
+  overall_status: string;
+  liquidity: { score: number; status: string; reserve_ratio: number; min_required: number };
+  diversification: { score: number; status: string; categories: number };
+  yield: { score: number; status: string; weighted_apy: number };
+}
+
+export interface TreasuryOverview {
+  usdc_liquid: number;
+  total_rwa_principal: number;
+  total_rwa_current_value: number;
+  total_accrued_yield: number;
+  total_aum: number;
+  reserve_ratio: number;
+  weighted_avg_apy: number;
+  position_count: number;
+  positions: TreasuryPosition[];
+  category_breakdown: Record<string, { count: number; principal: number; current_value: number; avg_apy: number }>;
+  config: { min_reserve_ratio: number; target_reserve_ratio: number; rebalance_threshold: number };
+  health: TreasuryHealth;
+}
+
+export interface RwaAsset {
+  name: string;
+  symbol: string;
+  category: string;
+  apy: number;
+  risk_rating: string;
+  maturity_days: number;
+  min_investment: number;
+  issuer: string;
+  chain: string;
+  description: string;
+}
+
+// ── Gateway Types ──────────────────────────────────────────────────────
+
+export interface GatewayInfo {
+  provider: string;
+  description: string;
+  supported_currencies: string[];
+  payment_rails: Record<string, {
+    name: string;
+    currencies: string[];
+    min_amount: number;
+    max_amount: number;
+    estimated_time: string;
+    fee_percent: number;
+  }>;
+  features: string[];
+  docs_url: string;
+  treasury_integration: {
+    on_ramp_flow: string[];
+    off_ramp_flow: string[];
+  };
+}
+
+export interface GatewayTransaction {
+  id: string;
+  type: string;
+  fiat_amount: number;
+  fiat_currency: string;
+  usdc_amount: number;
+  fee: number;
+  rail: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// ── Bridge / CCTP Types ────────────────────────────────────────────────
+
+export interface CctpDomainInfo {
+  domain: number;
+  chain_id: number;
+  testnet_chain_id: number;
+  testnet_name: string;
+  usdc_contract: string;
+}
+
+export type CctpDomains = Record<string, CctpDomainInfo>;
+
+export interface BridgeRoute {
+  source_chain: string;
+  destination_chain: string;
+  source_domain: number;
+  destination_domain: number;
+  fee_usdc: number;
+  estimated_seconds: number;
+  protocol: string;
+  status: string;
+}
+
+export interface BridgePlanStep {
+  step: number;
+  action: string;
+  chain: string;
+  contract?: string;
+  description: string;
+}
+
+export interface BridgePlan {
+  type: string;
+  source_chain: string;
+  destination_chain: string;
+  steps: BridgePlanStep[];
+  fee_usdc: number;
+  estimated_seconds: number;
+  net_amount: number;
+  gross_amount?: number;
+  attestation_url?: string;
+}

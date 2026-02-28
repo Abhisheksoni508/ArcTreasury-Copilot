@@ -8,6 +8,8 @@ import type {
   PolicyRunResponse, ExecutionResponse, SeedResponse,
   HealthResponse, Settings, WalletSetupResponse, WalletBalanceResponse,
   AgentStatus, AgentActivity, AgentStrategyInfo,
+  TreasuryOverview, RwaAsset, GatewayInfo, GatewayTransaction,
+  CctpDomains, BridgeRoute, BridgePlan,
 } from './types';
 
 const BASE = '/api';
@@ -96,3 +98,27 @@ export const clearAgentActivity = () =>
   request<{ cleared: boolean }>('/agent/activity', { method: 'DELETE' });
 export const getAgentStrategies = () =>
   request<Record<string, AgentStrategyInfo>>('/agent/strategies');
+
+// ── Treasury / RWA ──────────────────────────────────────────────────────
+export const getTreasuryOverview = () => request<TreasuryOverview>('/treasury/overview');
+export const getRwaCatalog = () => request<RwaAsset[]>('/treasury/catalog');
+export const allocateToRwa = (asset_symbol: string, amount_usdc: number) =>
+  request<unknown>('/treasury/allocate', { method: 'POST', body: JSON.stringify({ asset_symbol, amount_usdc }) });
+export const redeemRwaPosition = (positionId: string) =>
+  request<unknown>(`/treasury/redeem/${positionId}`, { method: 'POST' });
+export const triggerRebalance = () => request<unknown>('/treasury/rebalance', { method: 'POST' });
+export const seedTreasuryPositions = () => request<unknown>('/treasury/seed', { method: 'POST' });
+
+// ── Circle Gateway ──────────────────────────────────────────────────────
+export const getGatewayInfo = () => request<GatewayInfo>('/gateway/info');
+export const createDeposit = (amount: number, currency = 'USD', rail = 'wire') =>
+  request<unknown>('/gateway/deposit', { method: 'POST', body: JSON.stringify({ amount, currency, rail }) });
+export const createWithdrawal = (amount_usdc: number, currency = 'USD', rail = 'wire') =>
+  request<unknown>('/gateway/withdraw', { method: 'POST', body: JSON.stringify({ amount_usdc, currency, rail }) });
+export const getGatewayTransactions = () => request<GatewayTransaction[]>('/gateway/transactions');
+
+// ── CCTP Bridge ─────────────────────────────────────────────────────────
+export const getBridgeDomains = () => request<CctpDomains>('/bridge/domains');
+export const getBridgeRoutes = () => request<BridgeRoute[]>('/bridge/routes');
+export const planBridgeRoute = (source_chain: string, destination_chain: string, amount: number) =>
+  request<BridgePlan>('/bridge/plan', { method: 'POST', body: JSON.stringify({ source_chain, destination_chain, amount }) });
