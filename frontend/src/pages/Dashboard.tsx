@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { listBatches, getHealth, listExecutions } from '../api';
-import type { Batch, HealthResponse, PayoutItem } from '../types';
+import { listBatches, getHealth, listExecutions, getTreasuryBalance } from '../api';
+import type { Batch, HealthResponse, PayoutItem, WalletBalanceResponse } from '../types';
 import StatusBadge from '../components/StatusBadge';
 
 export default function Dashboard() {
   const [batches, setBatches] = useState<Batch[]>([]);
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [executions, setExecutions] = useState<PayoutItem[]>([]);
+  const [walletBalance, setWalletBalance] = useState<WalletBalanceResponse | null>(null);
+  const [balanceError, setBalanceError] = useState('');
   const [error, setError] = useState('');
   const nav = useNavigate();
 
@@ -15,12 +17,16 @@ export default function Dashboard() {
     getHealth().then(setHealth).catch(() => setError('Backend unavailable — start the FastAPI server on port 8000'));
     listBatches().then(setBatches).catch(() => {});
     listExecutions().then(setExecutions).catch(() => {});
+    getTreasuryBalance().then(setWalletBalance).catch((e) => {
+      setBalanceError(e instanceof Error ? e.message : 'Unable to load treasury balance');
+    });
   }, []);
 
   const totalVolume = batches.reduce((s, b) => s + b.total_amount, 0);
   const totalItems = batches.reduce((s, b) => s + b.item_count, 0);
   const settled = executions.filter(e => e.execution_status === 'SETTLED').length;
   const failed = executions.filter(e => e.execution_status === 'FAILED').length;
+  const usdcBalance = walletBalance?.balances.find((b) => b.token.symbol === 'USDC' || b.token.symbol === 'USD');
 
   return (
     <div className="space-y-6">
@@ -56,15 +62,25 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Stats cards */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-5 gap-4">
         <StatCard label="Total Batches" value={batches.length} />
         <StatCard label="Total Volume" value={`$${totalVolume.toLocaleString()}`} />
+        <StatCard label="Total Items" value={totalItems} />
         <StatCard label="Items Settled" value={settled} color="text-green-600" />
         <StatCard label="Items Failed" value={failed} color="text-red-600" />
       </div>
 
-      {/* Recent batches */}
+      <div className="bg-white rounded-xl shadow-sm border px-5 py-4">
+        <div className="text-xs text-gray-500 uppercase tracking-wide">Treasury USDC Balance</div>
+        {usdcBalance ? (
+          <div className="mt-1 text-2xl font-bold text-blue-700">{Number(usdcBalance.amount).toLocaleString()} USDC</div>
+        ) : (
+          <div className="mt-1 text-sm text-gray-500">Unavailable</div>
+        )}
+        {walletBalance?.wallet_id && <div className="text-xs text-gray-400 mt-1">Wallet ID: {walletBalance.wallet_id}</div>}
+        {balanceError && <div className="text-xs text-amber-600 mt-1">{balanceError}</div>}
+      </div>
+
       <div className="bg-white rounded-xl shadow-sm border">
         <div className="px-5 py-4 border-b flex items-center justify-between">
           <h3 className="font-semibold">Recent Batches</h3>
@@ -109,7 +125,6 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Recent execution items */}
       {executions.length > 0 && (
         <div className="bg-white rounded-xl shadow-sm border">
           <div className="px-5 py-4 border-b">

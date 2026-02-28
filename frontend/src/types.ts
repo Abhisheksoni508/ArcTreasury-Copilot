@@ -100,6 +100,25 @@ export interface SeedResponse {
   message: string;
 }
 
+
+export interface WalletSetupResponse {
+  wallet_set_id: string;
+  wallet_id: string;
+  address: string;
+  blockchain: string;
+  message: string;
+}
+
+export interface WalletBalanceResponse {
+  wallet_id: string;
+  balances: Array<{
+    amount: string;
+    token: {
+      symbol: string;
+    };
+  }>;
+}
+
 export interface HealthResponse {
   status: string;
   adapter_mode: string;
