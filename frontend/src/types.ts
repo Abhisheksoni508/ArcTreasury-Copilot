@@ -239,6 +239,7 @@ export interface GatewayInfo {
     estimated_time: string;
     fee_percent: number;
   }>;
+  fx_rates: Record<string, number>;
   features: string[];
   docs_url: string;
   treasury_integration: {

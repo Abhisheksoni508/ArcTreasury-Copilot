@@ -479,13 +479,20 @@ export default function TreasuryPage() {
                     <li key={i} className="flex gap-2"><span className="text-emerald-400 font-mono text-xs mt-0.5">{step.slice(0, 2)}</span>{step.slice(3)}</li>
                   ))}
                 </ol>
-                <div className="mt-4 flex gap-2">
-                  <input type="number" value={depositAmt} onChange={e => setDepositAmt(e.target.value)}
-                    placeholder="USD amount" className="flex-1 px-3 py-2 rounded-lg border border-emerald-200 text-sm bg-white" />
-                  <button onClick={handleDeposit} disabled={gwLoading}
-                    className="px-4 py-2 bg-emerald-600 text-white rounded-lg font-bold text-sm hover:bg-emerald-700 disabled:opacity-50">
-                    {gwLoading ? '...' : 'Deposit'}
-                  </button>
+                <div className="mt-4 space-y-2">
+                  <div className="flex gap-2">
+                    <input type="number" value={depositAmt} onChange={e => setDepositAmt(e.target.value)}
+                      placeholder={`${selectedCurrency} amount`} className="flex-1 px-3 py-2 rounded-lg border border-emerald-200 text-sm bg-white" />
+                    <button onClick={handleDeposit} disabled={gwLoading}
+                      className="px-4 py-2 bg-emerald-600 text-white rounded-lg font-bold text-sm hover:bg-emerald-700 disabled:opacity-50">
+                      {gwLoading ? '...' : 'Deposit'}
+                    </button>
+                  </div>
+                  {depositAmt && selectedCurrency !== 'USD' && (
+                    <div className="text-xs text-emerald-600 bg-emerald-100/60 rounded-lg px-3 py-1.5 border border-emerald-200">
+                      {selectedCurrency} {parseFloat(depositAmt).toLocaleString()} × {gatewayInfo.fx_rates?.[selectedCurrency] ?? 1} = <strong>${(parseFloat(depositAmt) * (gatewayInfo.fx_rates?.[selectedCurrency] ?? 1)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC</strong>
+                    </div>
+                  )}
                 </div>
               </div>
               {/* Off-ramp Flow */}
@@ -496,13 +503,20 @@ export default function TreasuryPage() {
                     <li key={i} className="flex gap-2"><span className="text-blue-400 font-mono text-xs mt-0.5">{step.slice(0, 2)}</span>{step.slice(3)}</li>
                   ))}
                 </ol>
-                <div className="mt-4 flex gap-2">
-                  <input type="number" value={withdrawAmt} onChange={e => setWithdrawAmt(e.target.value)}
-                    placeholder="USDC amount" className="flex-1 px-3 py-2 rounded-lg border border-blue-200 text-sm bg-white" />
-                  <button onClick={handleWithdraw} disabled={gwLoading}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold text-sm hover:bg-blue-700 disabled:opacity-50">
-                    {gwLoading ? '...' : 'Withdraw'}
-                  </button>
+                <div className="mt-4 space-y-2">
+                  <div className="flex gap-2">
+                    <input type="number" value={withdrawAmt} onChange={e => setWithdrawAmt(e.target.value)}
+                      placeholder="USDC amount" className="flex-1 px-3 py-2 rounded-lg border border-blue-200 text-sm bg-white" />
+                    <button onClick={handleWithdraw} disabled={gwLoading}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold text-sm hover:bg-blue-700 disabled:opacity-50">
+                      {gwLoading ? '...' : 'Withdraw'}
+                    </button>
+                  </div>
+                  {withdrawAmt && selectedCurrency !== 'USD' && (
+                    <div className="text-xs text-blue-600 bg-blue-100/60 rounded-lg px-3 py-1.5 border border-blue-200">
+                      ${parseFloat(withdrawAmt).toLocaleString()} USDC ÷ {gatewayInfo.fx_rates?.[selectedCurrency] ?? 1} = <strong>{selectedCurrency} {(parseFloat(withdrawAmt) / (gatewayInfo.fx_rates?.[selectedCurrency] ?? 1)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

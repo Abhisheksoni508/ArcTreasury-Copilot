@@ -27,6 +27,26 @@ from app.config import settings
 from app.services.audit_service import log_audit
 
 
+# ── FX Rates (mid-market approximations for demo) ────────────────────────
+# In production, these would be fetched from a live FX feed or Circle's rates.
+FX_RATES_TO_USD: dict[str, float] = {
+    "USD": 1.0,
+    "EUR": 1.08,    # 1 EUR = 1.08 USD
+    "GBP": 1.27,    # 1 GBP = 1.27 USD
+    "SGD": 0.74,    # 1 SGD = 0.74 USD
+}
+
+def _convert_to_usd(amount: float, currency: str) -> float:
+    """Convert a fiat amount to USD equivalent."""
+    rate = FX_RATES_TO_USD.get(currency, 1.0)
+    return round(amount * rate, 2)
+
+def _convert_from_usd(amount_usd: float, currency: str) -> float:
+    """Convert a USD amount to target fiat currency."""
+    rate = FX_RATES_TO_USD.get(currency, 1.0)
+    return round(amount_usd / rate, 2)
+
+
 # ── Gateway Configuration ────────────────────────────────────────────────
 
 SUPPORTED_FIAT_CURRENCIES = ["USD", "EUR", "GBP", "SGD"]
@@ -66,6 +86,7 @@ def get_gateway_info() -> dict:
         "description": "Fiat on/off ramp for USDC treasury operations",
         "supported_currencies": SUPPORTED_FIAT_CURRENCIES,
         "payment_rails": PAYMENT_RAILS,
+        "fx_rates": FX_RATES_TO_USD,
         "docs_url": "https://developers.circle.com/circle-mint/docs/circle-gateway",
         "features": [
             "Fiat → USDC on-ramp (bank deposit → mint USDC)",
@@ -118,7 +139,10 @@ async def create_deposit_intent(
         return {"error": f"Minimum for {rail}: {currency} {rail_config['min_amount']:,.2f}"}
 
     fee = round(amount * rail_config["fee_percent"] / 100, 2)
-    usdc_amount = round(amount - fee, 2)
+    net_fiat = round(amount - fee, 2)
+    # Convert to USD first, then that's the USDC amount (1 USD = 1 USDC)
+    usd_equivalent = _convert_to_usd(net_fiat, currency)
+    usdc_amount = usd_equivalent
 
     intent_id = f"dep-{uuid.uuid4().hex[:12]}"
     now = datetime.now(timezone.utc).isoformat()
@@ -135,21 +159,26 @@ async def create_deposit_intent(
     )
     await log_audit(db, "gateway", intent_id, "DEPOSIT_INTENT",
                     f"{currency} {amount:,.2f}", f"USDC {usdc_amount:,.2f}",
-                    f"Fiat deposit intent via {rail}: {currency} {amount:,.2f} → {usdc_amount:,.2f} USDC")
+                    f"Fiat deposit via {rail}: {currency} {amount:,.2f} (USD {usd_equivalent:,.2f}) → {usdc_amount:,.2f} USDC")
     await db.commit()
+
+    fx_note = f" (FX rate: 1 {currency} = {FX_RATES_TO_USD.get(currency, 1.0)} USD)" if currency != "USD" else ""
 
     return {
         "intent_id": intent_id,
         "type": "DEPOSIT",
         "fiat_amount": amount,
         "fiat_currency": currency,
+        "usd_equivalent": usd_equivalent,
         "usdc_amount": usdc_amount,
         "fee": fee,
+        "fee_currency": currency,
+        "fx_rate": FX_RATES_TO_USD.get(currency, 1.0),
         "rail": rail,
         "estimated_time": rail_config["estimated_time"],
         "status": "PENDING",
         "bank_instructions": _generate_wire_instructions(intent_id, amount, currency),
-        "message": f"Send {currency} {amount:,.2f} via {rail_config['name']}. {usdc_amount:,.2f} USDC will be minted upon receipt.",
+        "message": f"Send {currency} {amount:,.2f} via {rail_config['name']}{fx_note}. {usdc_amount:,.2f} USDC will be minted upon receipt.",
     }
 
 
@@ -171,8 +200,10 @@ async def create_withdrawal_intent(
     if not rail_config:
         return {"error": f"Payment rail '{rail}' not supported"}
 
-    fee = round(amount_usdc * rail_config["fee_percent"] / 100, 2)
-    fiat_amount = round(amount_usdc - fee, 2)
+    fee_usdc = round(amount_usdc * rail_config["fee_percent"] / 100, 2)
+    net_usdc = round(amount_usdc - fee_usdc, 2)
+    # Convert from USD (USDC) to target fiat currency
+    fiat_amount = _convert_from_usd(net_usdc, currency)
 
     intent_id = f"wd-{uuid.uuid4().hex[:12]}"
     now = datetime.now(timezone.utc).isoformat()
@@ -182,7 +213,7 @@ async def create_withdrawal_intent(
            (id, type, fiat_amount, fiat_currency, usdc_amount, fee, rail, status,
             bank_instructions, created_at, updated_at)
            VALUES (?, 'WITHDRAWAL', ?, ?, ?, ?, ?, 'PENDING', ?, ?, ?)""",
-        (intent_id, fiat_amount, currency, amount_usdc, fee, rail,
+        (intent_id, fiat_amount, currency, amount_usdc, fee_usdc, rail,
          json.dumps({"bank_account": bank_account or "****1234", "reference": intent_id}),
          now, now),
     )
@@ -191,17 +222,20 @@ async def create_withdrawal_intent(
                     f"Fiat withdrawal via {rail}: {amount_usdc:,.2f} USDC → {currency} {fiat_amount:,.2f}")
     await db.commit()
 
+    fx_note = f" (FX rate: 1 USD = {round(1/FX_RATES_TO_USD.get(currency, 1.0), 4)} {currency})" if currency != "USD" else ""
+
     return {
         "intent_id": intent_id,
         "type": "WITHDRAWAL",
         "usdc_amount": amount_usdc,
         "fiat_amount": fiat_amount,
         "fiat_currency": currency,
-        "fee": fee,
+        "fee": fee_usdc,
+        "fx_rate": FX_RATES_TO_USD.get(currency, 1.0),
         "rail": rail,
         "estimated_time": rail_config["estimated_time"],
         "status": "PENDING",
-        "message": f"{amount_usdc:,.2f} USDC will be burned. {currency} {fiat_amount:,.2f} sent via {rail_config['name']}.",
+        "message": f"{amount_usdc:,.2f} USDC will be burned. {currency} {fiat_amount:,.2f} sent via {rail_config['name']}{fx_note}.",
     }
 
 
