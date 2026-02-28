@@ -283,10 +283,10 @@ async def get_treasury_overview(db: aiosqlite.Connection) -> dict:
     # Reserve ratio
     reserve_ratio = usdc_liquid / total_aum if total_aum > 0 else 1.0
 
-    # Weighted average APY
+    # Weighted average APY (based on total AUM so idle USDC dilutes yield)
     weighted_apy = 0
-    if total_rwa_principal > 0:
-        weighted_apy = sum(p["apy"] * p["amount_usdc"] for p in positions) / total_rwa_principal
+    if total_aum > 0:
+        weighted_apy = sum(p["apy"] * p["amount_usdc"] for p in positions) / total_aum
 
     # Category breakdown
     categories = {}
