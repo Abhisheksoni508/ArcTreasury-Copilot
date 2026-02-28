@@ -53,6 +53,7 @@ export default function TreasuryPage() {
   const [allocAsset, setAllocAsset] = useState<string>('');
   const [allocAmount, setAllocAmount] = useState('');
   const [allocating, setAllocating] = useState(false);
+  const [notification, setNotification] = useState<{ message: string; type: 'error' | 'success' } | null>(null);
 
   // Gateway state
   const [gatewayInfo, setGatewayInfo] = useState<GatewayInfo | null>(null);
@@ -103,6 +104,19 @@ export default function TreasuryPage() {
   const handleAllocate = async () => {
     if (!allocAsset || !allocAmount) return;
     setAllocating(true);
+
+    // Find asset to check minimum
+    const asset = catalog.find(a => a.symbol === allocAsset);
+    if (asset && parseFloat(allocAmount) < asset.min_investment) {
+      setNotification({
+        type: 'error',
+        message: `Minimum investment for ${asset.name} is ${usd(asset.min_investment)}`
+      });
+      setTimeout(() => setNotification(null), 4000);
+      setAllocating(false);
+      return;
+    }
+
     try {
       await allocateToRwa(allocAsset, parseFloat(allocAmount));
       setAllocAsset('');
@@ -157,7 +171,17 @@ export default function TreasuryPage() {
   const health = overview?.health;
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-700 pb-12">
+    <div className="space-y-6 animate-in fade-in duration-700 pb-12 relative">
+      {/* Top Banner Notification */}
+      {notification && (
+        <div className="fixed top-0 left-0 w-full z-50 flex justify-center animate-in slide-in-from-top-4 fade-in duration-300">
+          <div className={`mt-4 px-6 py-3 rounded-2xl shadow-2xl backdrop-blur-md border border-white/20 flex items-center gap-3 font-bold text-sm text-white ${notification.type === 'error' ? 'bg-rose-500/90 shadow-rose-500/20' : 'bg-emerald-500/90 shadow-emerald-500/20'}`}>
+            <span>{notification.message}</span>
+            <button onClick={() => setNotification(null)} className="ml-2 hover:opacity-75 transition-opacity">✕</button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
