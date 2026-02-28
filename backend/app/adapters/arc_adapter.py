@@ -201,3 +201,25 @@ class ArcAdapter:
                 )
         except Exception as e:
             return LegResult(status="FAILED", error_message=str(e)[:200], is_simulated=True)
+
+    async def get_wallet_balance(self) -> dict:
+        """Fetch source wallet balances from Circle W3S API."""
+        if not self.api_key or not self.source_wallet:
+            return {"error": "Arc source wallet not configured", "balances": []}
+            
+        try:
+            async with httpx.AsyncClient() as client:
+                resp = await client.get(
+                    f"{self.base_url}/wallets/{self.source_wallet}/balances",
+                    headers=self._headers(),
+                    timeout=15.0,
+                )
+                if resp.status_code == 200:
+                    data = resp.json().get("data", {})
+                    return {
+                        "wallet_id": self.source_wallet,
+                        "balances": data.get("tokenBalances", []),
+                    }
+                return {"error": f"HTTP {resp.status_code}", "balances": []}
+        except Exception as e:
+            return {"error": str(e)[:200], "balances": []}

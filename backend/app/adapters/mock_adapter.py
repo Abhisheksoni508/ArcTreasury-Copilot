@@ -75,6 +75,18 @@ class MockAdapter:
             return LegResult(status="SUBMITTED", tx_hash=tx_hash, is_simulated=True)
         return LegResult(status="CONFIRMED", tx_hash=tx_hash, is_simulated=True)
 
+    async def get_wallet_balance(self) -> dict:
+        """Simulated treasury balance for demo."""
+        return {
+            "wallet_id": "mock-wallet-9999",
+            "balances": [
+                {
+                    "token": {"symbol": "USDC", "name": "USD Coin", "decimals": 6},
+                    "amount": "1000000.00",
+                    "updateDate": "2024-01-01T00:00:00Z"
+                }
+            ]
+        }
 
 def reset_attempt_tracker():
     """Reset for testing."""

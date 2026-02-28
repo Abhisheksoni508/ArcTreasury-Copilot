@@ -6,7 +6,7 @@ export default function ModeToggle() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    getSettings().then(s => setMode(s.adapter_mode)).catch(() => {});
+    getSettings().then(s => setMode(s.adapter_mode)).catch(() => { });
   }, []);
 
   const toggle = async () => {
@@ -15,6 +15,7 @@ export default function ModeToggle() {
     try {
       const s = await updateSettings({ adapter_mode: next });
       setMode(s.adapter_mode);
+      window.dispatchEvent(new CustomEvent('adapterModeChanged', { detail: s.adapter_mode }));
     } catch {
       // ignore
     }

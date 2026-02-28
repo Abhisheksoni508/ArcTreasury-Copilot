@@ -115,19 +115,26 @@ async def list_wallets(wallet_set_id: str | None = None):
 
 @router.get("/wallets/balance", tags=["Wallets"])
 async def wallet_balance():
-    """Fetch token balances for the configured treasury wallet (CIRCLE_WALLET_ID)."""
-    if not settings.CIRCLE_API_KEY:
-        raise HTTPException(status_code=400, detail="CIRCLE_API_KEY not configured in .env")
-    if not settings.CIRCLE_WALLET_ID:
-        raise HTTPException(
-            status_code=400,
-            detail=(
-                "CIRCLE_WALLET_ID not set. "
-                "Call POST /api/wallets/setup first or set CIRCLE_WALLET_ID in .env."
-            ),
-        )
+    """Fetch token balances for the configured treasury wallet."""
+    if settings.ADAPTER_MODE == "mock":
+        from app.adapters.mock_adapter import MockAdapter
+        adapter = MockAdapter()
+        return await adapter.get_wallet_balance()
 
-    adapter = CircleAdapter()
+    if settings.ADAPTER_MODE == "arc":
+        from app.adapters.arc_adapter import ArcAdapter
+        adapter = ArcAdapter()
+    else:
+        if not settings.CIRCLE_API_KEY:
+            raise HTTPException(status_code=400, detail="CIRCLE_API_KEY not configured in .env")
+        if not settings.CIRCLE_WALLET_ID:
+            raise HTTPException(
+                status_code=400,
+                detail="CIRCLE_WALLET_ID not set. Call POST /api/wallets/setup first."
+            )
+        from app.adapters.circle_adapter import CircleAdapter
+        adapter = CircleAdapter()
+
     result = await adapter.get_wallet_balance()
     if "error" in result:
         raise HTTPException(status_code=502, detail=result["error"])
