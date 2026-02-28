@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import AnimatedLogo from './AnimatedLogo';
 
 const NAV = [
   { to: '/', label: 'Dashboard', icon: '📊' },
@@ -14,8 +15,8 @@ export default function Sidebar() {
     <aside className="w-64 bg-white/60 backdrop-blur-xl border-r border-white/60 shadow-2xl shadow-blue-900/5 flex flex-col min-h-screen relative z-20">
       <div className="px-6 py-8">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/30 text-white font-bold text-xl drop-shadow-md">
-            A
+          <div className="w-12 h-12 flex items-center justify-center shrink-0">
+            <AnimatedLogo className="w-full h-full" />
           </div>
           <div>
             <h1 className="text-xl font-extrabold tracking-tight text-slate-900 leading-tight">ArcTreasury</h1>
