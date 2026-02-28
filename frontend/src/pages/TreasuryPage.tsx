@@ -243,26 +243,75 @@ export default function TreasuryPage() {
           </div>
 
           {/* Reserve Ratio Bar */}
-          <div className="bg-white/60 backdrop-blur rounded-2xl p-5 border border-white shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <span className="font-bold text-slate-700">Reserve Ratio</span>
-              <span className="text-sm font-bold text-slate-500">{pct(overview.reserve_ratio)} liquid ({pct(overview.config.min_reserve_ratio)} minimum)</span>
-            </div>
-            <div className="h-4 bg-slate-100 rounded-full overflow-hidden relative">
-              <div className="h-full bg-gradient-to-r from-cyan-400 to-cyan-600 rounded-full transition-all duration-700"
-                style={{ width: `${Math.min(100, overview.reserve_ratio * 100)}%` }} />
-              <div className="absolute top-0 h-full w-0.5 bg-rose-400"
-                style={{ left: `${overview.config.min_reserve_ratio * 100}%` }} />
-              <div className="absolute top-0 h-full w-0.5 bg-amber-400"
-                style={{ left: `${(overview.config.target_reserve_ratio ?? 0.3) * 100}%` }} />
-            </div>
-            <div className="flex justify-between mt-1 text-xs text-slate-400">
-              <span>0%</span>
-              <span className="text-rose-400">Min {pct(overview.config.min_reserve_ratio)}</span>
-              <span className="text-amber-400">Target {pct(overview.config.target_reserve_ratio ?? 0.3)}</span>
-              <span>100%</span>
-            </div>
-          </div>
+          {(() => {
+            const ratio = overview.reserve_ratio;
+            const minR = overview.config.min_reserve_ratio;
+            const targetR = overview.config.target_reserve_ratio ?? 0.3;
+            const status = ratio >= targetR ? 'Healthy' : ratio >= minR ? 'Adequate' : 'Critical';
+            const statusColor = ratio >= targetR ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : ratio >= minR ? 'text-amber-600 bg-amber-50 border-amber-200' : 'text-rose-600 bg-rose-50 border-rose-200';
+            const barColor = ratio >= targetR ? 'from-emerald-400 to-cyan-500' : ratio >= minR ? 'from-amber-400 to-yellow-500' : 'from-rose-400 to-red-500';
+            return (
+              <div className="bg-white/60 backdrop-blur rounded-2xl p-5 border border-white shadow-sm">
+                {/* Top row: title + status badge + percentage */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <span className="font-extrabold text-slate-800 text-base">Reserve Ratio</span>
+                    <span className={`text-xs px-2.5 py-1 rounded-lg font-bold border ${statusColor}`}>{status}</span>
+                  </div>
+                  <span className={`text-2xl font-black tabular-nums ${ratio >= targetR ? 'text-emerald-600' : ratio >= minR ? 'text-amber-600' : 'text-rose-600'}`}>
+                    {pct(ratio)}
+                  </span>
+                </div>
+
+                {/* Info row: liquid vs deployed */}
+                <div className="grid grid-cols-3 gap-4 mb-4 text-xs">
+                  <div className="bg-cyan-50/80 rounded-xl px-3 py-2 border border-cyan-100">
+                    <span className="text-slate-400 block">Liquid USDC</span>
+                    <span className="font-extrabold text-cyan-700">{usd(overview.usdc_liquid)}</span>
+                  </div>
+                  <div className="bg-purple-50/80 rounded-xl px-3 py-2 border border-purple-100">
+                    <span className="text-slate-400 block">Deployed in RWA</span>
+                    <span className="font-extrabold text-purple-700">{usd(overview.total_rwa_current_value)}</span>
+                  </div>
+                  <div className="bg-slate-50/80 rounded-xl px-3 py-2 border border-slate-100">
+                    <span className="text-slate-400 block">Total AUM</span>
+                    <span className="font-extrabold text-slate-800">{usd(overview.total_aum)}</span>
+                  </div>
+                </div>
+
+                {/* Progress bar */}
+                <div className="relative">
+                  <div className="h-5 bg-slate-100 rounded-full overflow-hidden relative">
+                    <div className={`h-full bg-gradient-to-r ${barColor} rounded-full transition-all duration-700 ease-out`}
+                      style={{ width: `${Math.min(100, ratio * 100)}%` }} />
+
+                    {/* Min threshold marker */}
+                    <div className="absolute top-0 h-full flex flex-col items-center"
+                      style={{ left: `${minR * 100}%` }}>
+                      <div className="w-0.5 h-full bg-rose-400" />
+                    </div>
+
+                    {/* Target threshold marker */}
+                    <div className="absolute top-0 h-full flex flex-col items-center"
+                      style={{ left: `${targetR * 100}%` }}>
+                      <div className="w-0.5 h-full bg-amber-400" />
+                    </div>
+                  </div>
+
+                  {/* Legends below bar */}
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-[10px] text-slate-400 font-bold">0%</span>
+                    <div className="flex items-center gap-5 text-[10px] font-bold">
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-rose-400 inline-block" /> Min {pct(minR)}</span>
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400 inline-block" /> Target {pct(targetR)}</span>
+                      <span className="flex items-center gap-1"><span className={`w-2 h-2 rounded-full inline-block ${ratio >= targetR ? 'bg-emerald-500' : ratio >= minR ? 'bg-amber-500' : 'bg-rose-500'}`} /> Current {pct(ratio)}</span>
+                    </div>
+                    <span className="text-[10px] text-slate-400 font-bold">100%</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Allocation Section */}
           <div className="grid grid-cols-2 gap-6">
