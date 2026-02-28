@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { listExecutions, retryItem, getItemLegs } from '../api';
 import type { PayoutItem, PayoutLeg } from '../types';
@@ -72,9 +72,8 @@ export default function ExecutionMonitor() {
             </thead>
             <tbody className="divide-y">
               {items.map(item => (
-                <>
+                <Fragment key={item.id}>
                   <tr
-                    key={item.id}
                     className="hover:bg-gray-50 cursor-pointer"
                     onClick={() => handleExpand(item.id)}
                   >
@@ -140,7 +139,7 @@ export default function ExecutionMonitor() {
                       </td>
                     </tr>
                   )}
-                </>
+                </Fragment>
               ))}
             </tbody>
           </table>
