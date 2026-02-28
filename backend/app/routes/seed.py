@@ -13,7 +13,7 @@ DEMO_ITEMS = [
     {
         "id": "item-001",
         "recipient_name": "Alice Johnson",
-        "recipient_address": "0xSUCCESS_ALICE_001",
+        "recipient_address": "0xA11CE00000000000000000000000000000000001",
         "amount": 2500.00,
         "currency": "USDC",
         "destination_chain": "ethereum",
@@ -22,7 +22,7 @@ DEMO_ITEMS = [
     {
         "id": "item-002",
         "recipient_name": "Bob Martinez",
-        "recipient_address": "0xRETRY_BOB_002",
+        "recipient_address": "0xB0B0000000000000000000000000000000000002",
         "amount": 8000.00,
         "currency": "USDC",
         "destination_chain": "polygon",
@@ -31,7 +31,7 @@ DEMO_ITEMS = [
     {
         "id": "item-003",
         "recipient_name": "Charlie Corp",
-        "recipient_address": "0xSUCCESS_CHARLIE_003",
+        "recipient_address": "0xC0FFEE0000000000000000000000000000000003",
         "amount": 50000.00,
         "currency": "USDC",
         "destination_chain": "arbitrum",
@@ -40,7 +40,7 @@ DEMO_ITEMS = [
     {
         "id": "item-004",
         "recipient_name": "Diana Wei",
-        "recipient_address": "0xQUEUE_DIANA_004",
+        "recipient_address": "0xD1A6000000000000000000000000000000000004",
         "amount": 15000.00,
         "currency": "USDC",
         "destination_chain": "ethereum",
@@ -50,7 +50,7 @@ DEMO_ITEMS = [
         # Arc Bridge Kit demo: USDC bridged to Circle's Arc L1 via CCTP
         "id": "item-005",
         "recipient_name": "FutureFinance (Arc L1)",
-        "recipient_address": "0xSUCCESS_ARC_005",
+        "recipient_address": "0xFACE000000000000000000000000000000000005",
         "amount": 5000.00,
         "currency": "USDC",
         "destination_chain": "arc",   # Circle's Arc blockchain
@@ -59,7 +59,7 @@ DEMO_ITEMS = [
     {
         "id": "item-006",
         "recipient_name": "Echo Ltd",
-        "recipient_address": "0xNEW_ECHO_006",
+        "recipient_address": "0xE000000000000000000000000000000000000006",
         "amount": 18000.00,
         "currency": "USDC",
         "destination_chain": "solana",
@@ -68,7 +68,7 @@ DEMO_ITEMS = [
     {
         "id": "item-007",
         "recipient_name": "Fraudster Inc",
-        "recipient_address": "0xFAIL_BLOCKLISTED_666",
+        "recipient_address": "0xBADF00D000000000000000000000000000000007",
         "amount": 100000.00,
         "currency": "USDC",
         "destination_chain": "ethereum",

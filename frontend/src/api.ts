@@ -6,7 +6,7 @@
 import type {
   Batch, BatchDetail, PayoutItem, PayoutLeg, AuditLog,
   PolicyRunResponse, ExecutionResponse, SeedResponse,
-  HealthResponse, Settings,
+  HealthResponse, Settings, WalletSetupResponse, WalletBalanceResponse,
 } from './types';
 
 const BASE = '/api';
@@ -34,6 +34,12 @@ export const updateSettings = (body: Partial<Settings>) =>
 // ── Seed ────────────────────────────────────────────────────────────────
 export const seedDemoData = () =>
   request<SeedResponse>('/seed', { method: 'POST' });
+
+
+// ── Wallets ─────────────────────────────────────────────────────────────
+export const setupTreasuryWallet = (body?: { wallet_set_name?: string; wallet_name?: string; blockchains?: string[] }) =>
+  request<WalletSetupResponse>('/wallets/setup', { method: 'POST', body: JSON.stringify(body ?? {}) });
+export const getTreasuryBalance = () => request<WalletBalanceResponse>('/wallets/balance');
 
 // ── Batches ─────────────────────────────────────────────────────────────
 export const listBatches = () => request<Batch[]>('/batches');

@@ -74,6 +74,7 @@ async def setup_wallet(req: WalletSetupRequest):
 
         # Persist in-memory so payout execution uses it immediately
         settings.CIRCLE_WALLET_ID = wallet_id
+        settings.TREASURY_WALLET = address
 
         return WalletSetupResponse(
             wallet_set_id=wallet_set_id,

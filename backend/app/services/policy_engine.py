@@ -39,8 +39,27 @@ class PolicyDecision:
 
 # ── Blocklist / Known addresses (demo) ─────────────────────────────────
 
-BLOCKLIST = {"0xFAIL_BLOCKLISTED_666", "0xFRAUD_KNOWN_BAD"}
-KNOWN_GOOD = {"0xSUCCESS_ALICE_001", "0xSUCCESS_CHARLIE_003"}
+BLOCKLIST = {
+    "0xFAIL_BLOCKLISTED_666",
+    "0xFRAUD_KNOWN_BAD",
+    "0xBADF00D000000000000000000000000000000007",
+}
+KNOWN_GOOD = {
+    "0xSUCCESS_ALICE_001",
+    "0xSUCCESS_CHARLIE_003",
+    "0xA11CE00000000000000000000000000000000001",
+    "0xC0FFEE0000000000000000000000000000000003",
+    "0xFACE000000000000000000000000000000000005",
+}
+RETRY_FLAGS = {"0xRETRY_BOB_002", "0xB0B0000000000000000000000000000000000002"}
+QUEUE_FLAGS = {"0xQUEUE_DIANA_004", "0xD1A6000000000000000000000000000000000004"}
+NEW_RECIPIENT_FLAGS = {"0xNEW_ECHO_006", "0xE000000000000000000000000000000000000006"}
+
+BLOCKLIST_UPPER = {a.upper() for a in BLOCKLIST}
+KNOWN_GOOD_UPPER = {a.upper() for a in KNOWN_GOOD}
+RETRY_FLAGS_UPPER = {a.upper() for a in RETRY_FLAGS}
+QUEUE_FLAGS_UPPER = {a.upper() for a in QUEUE_FLAGS}
+NEW_RECIPIENT_FLAGS_UPPER = {a.upper() for a in NEW_RECIPIENT_FLAGS}
 
 
 def evaluate_item(
@@ -79,18 +98,18 @@ def evaluate_item(
 
     # Rule 3: Recipient risk (blocklist / pattern-based)
     addr_upper = recipient_address.upper()
-    if any(bl.upper() in addr_upper or addr_upper in bl.upper() for bl in BLOCKLIST) or "FAIL" in addr_upper:
+    if addr_upper in BLOCKLIST_UPPER or "FAIL" in addr_upper:
         rules.append(RuleResult("recipient_risk", 90, 1.0, False,
                                 "Recipient address on blocklist"))
-    elif "QUEUE" in addr_upper:
+    elif addr_upper in QUEUE_FLAGS_UPPER or "QUEUE" in addr_upper:
         rules.append(RuleResult("recipient_risk", 70, 1.0, False,
                                 "Recipient flagged for velocity anomaly"))
-    elif "RETRY" in addr_upper:
+    elif addr_upper in RETRY_FLAGS_UPPER or "RETRY" in addr_upper:
         rules.append(RuleResult("recipient_risk", 8, 1.0, True,
                                 "Recipient has minor risk flag"))
-    elif any(kg.upper() in addr_upper for kg in KNOWN_GOOD) or "SUCCESS" in addr_upper:
+    elif addr_upper in KNOWN_GOOD_UPPER or "SUCCESS" in addr_upper:
         rules.append(RuleResult("recipient_risk", 0, 1.0, True, "Recipient is known-good"))
-    elif "NEW" in addr_upper:
+    elif addr_upper in NEW_RECIPIENT_FLAGS_UPPER or "NEW" in addr_upper:
         rules.append(RuleResult("recipient_risk", 30, 1.0, False,
                                 "New recipient — no payment history on file"))
     else:

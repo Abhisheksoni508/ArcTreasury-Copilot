@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { getSettings, updateSettings } from '../api';
-import type { Settings as SettingsType } from '../types';
+import { getSettings, updateSettings, setupTreasuryWallet } from '../api';
+import type { Settings as SettingsType, WalletSetupResponse } from '../types';
 
 const ADAPTER_DETAILS: Record<string, { label: string; description: string; color: string; detail: string }> = {
   mock: {
@@ -26,6 +26,9 @@ const ADAPTER_DETAILS: Record<string, { label: string; description: string; colo
 export default function Settings() {
   const [settings, setSettings] = useState<SettingsType | null>(null);
   const [saving, setSaving] = useState(false);
+  const [setupLoading, setSetupLoading] = useState(false);
+  const [setupError, setSetupError] = useState('');
+  const [setupResult, setSetupResult] = useState<WalletSetupResponse | null>(null);
 
   useEffect(() => {
     getSettings().then(setSettings).catch(() => {});
@@ -42,6 +45,20 @@ export default function Settings() {
     setSaving(false);
   };
 
+  const handleSetupWallet = async () => {
+    setSetupLoading(true);
+    setSetupError('');
+    try {
+      const result = await setupTreasuryWallet();
+      setSetupResult(result);
+      const updatedSettings = await getSettings();
+      setSettings(updatedSettings);
+    } catch (error) {
+      setSetupError(error instanceof Error ? error.message : 'Wallet setup failed');
+    }
+    setSetupLoading(false);
+  };
+
   if (!settings) {
     return <div className="text-gray-400 py-10 text-center">Loading settings...</div>;
   }
@@ -52,7 +69,6 @@ export default function Settings() {
     <div className="space-y-6 max-w-2xl">
       <h2 className="text-2xl font-bold">Settings</h2>
 
-      {/* Adapter Mode */}
       <div className="bg-white rounded-xl shadow-sm border p-6 space-y-4">
         <h3 className="font-semibold text-lg">Adapter Mode</h3>
         <p className="text-sm text-gray-500">
@@ -84,7 +100,34 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* Circle Gateway Integration */}
+      <div className="bg-white rounded-xl shadow-sm border p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-lg">Treasury Wallet Setup</h3>
+          <button
+            onClick={handleSetupWallet}
+            disabled={setupLoading}
+            className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60"
+          >
+            {setupLoading ? 'Setting up...' : 'Setup Treasury Wallet'}
+          </button>
+        </div>
+        <p className="text-xs text-gray-500">
+          Creates a Circle developer-controlled wallet and configures <code className="bg-gray-100 px-1 rounded">CIRCLE_WALLET_ID</code>
+          in the running backend process so real payouts can execute immediately.
+        </p>
+        {setupError && (
+          <div className="text-xs bg-red-50 border border-red-200 text-red-700 rounded p-3">{setupError}</div>
+        )}
+        {setupResult && (
+          <div className="text-xs bg-green-50 border border-green-200 text-green-700 rounded p-3 space-y-1">
+            <p><strong>Wallet ID:</strong> <code>{setupResult.wallet_id}</code></p>
+            <p><strong>Address:</strong> <code>{setupResult.address}</code></p>
+            <p><strong>Chain:</strong> {setupResult.blockchain}</p>
+            <p>{setupResult.message}</p>
+          </div>
+        )}
+      </div>
+
       <div className="bg-white rounded-xl shadow-sm border p-6 space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-lg">Circle Gateway + Circle Wallets</h3>
@@ -123,7 +166,6 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* Arc Bridge Kit Integration */}
       <div className="bg-white rounded-xl shadow-sm border p-6 space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-lg">Arc Bridge Kit (Circle L1)</h3>
@@ -152,7 +194,6 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* Policy Config */}
       <div className="bg-white rounded-xl shadow-sm border p-6 space-y-4">
         <h3 className="font-semibold text-lg">Policy Configuration</h3>
         <div className="grid grid-cols-2 gap-4 text-sm">
@@ -167,7 +208,6 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* Chain & Wallet Info */}
       <div className="bg-white rounded-xl shadow-sm border p-6 space-y-4">
         <h3 className="font-semibold text-lg">System Info</h3>
         <div className="text-sm space-y-2">
@@ -177,12 +217,11 @@ export default function Settings() {
           </div>
           <div>
             <span className="text-gray-500">Treasury Wallet: </span>
-            <span className="font-mono text-xs">{settings.treasury_wallet}</span>
+            <span className="font-mono text-xs break-all">{settings.treasury_wallet}</span>
           </div>
         </div>
       </div>
 
-      {/* Mode Legend */}
       <div className="bg-amber-50 border border-amber-200 rounded-xl p-5">
         <h4 className="font-semibold text-amber-800 text-sm">About Real vs Simulated</h4>
         <ul className="mt-2 text-sm text-amber-700 space-y-1">
