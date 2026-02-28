@@ -43,9 +43,12 @@ class ArcAdapter:
     """
 
     def __init__(self):
-        self.api_key = settings.ARC_API_KEY or settings.CIRCLE_API_KEY
-        self.wallet_id = settings.CIRCLE_WALLET_ID
+        # Use CIRCLE_API_KEY — the wallet was created under this key,
+        # so only it has permission to read balances and sign transfers.
+        # ARC_API_KEY may be a separate key that doesn't own the wallet.
+        self.api_key = settings.CIRCLE_API_KEY or settings.ARC_API_KEY
         self.wallet_address = settings.ARC_SOURCE_WALLET
+        self.wallet_id = settings.CIRCLE_WALLET_ID  # UUID for balance API
         self.entity_secret = settings.CIRCLE_ENTITY_SECRET
         self.arc_chain = settings.ARC_CHAIN  # "ARC-TESTNET" or "ARC"
 
@@ -206,7 +209,7 @@ class ArcAdapter:
     async def get_wallet_balance(self) -> dict:
         """Fetch source wallet balances from Circle W3S API."""
         if not self.api_key or not self.wallet_id:
-            return {"error": "Arc source wallet not configured", "balances": []}
+            return {"error": "Arc wallet not configured (need CIRCLE_WALLET_ID)", "balances": []}
             
         auth_key = settings.CIRCLE_API_KEY or self.api_key
         headers = {
