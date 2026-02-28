@@ -71,8 +71,8 @@ export default function TreasuryPage() {
   // Active tab
   const [tab, setTab] = useState<'treasury' | 'gateway' | 'bridge'>('treasury');
 
-  const fetchAll = useCallback(async () => {
-    setLoading(true);
+  const fetchAll = useCallback(async (showLoader = true) => {
+    if (showLoader) setLoading(true);
     setError('');
     try {
       const [ov, cat, gwInfo, gwTxns, dom, rts] = await Promise.all([
@@ -106,30 +106,30 @@ export default function TreasuryPage() {
       await allocateToRwa(allocAsset, parseFloat(allocAmount));
       setAllocAsset('');
       setAllocAmount('');
-      await fetchAll();
+      await fetchAll(false);
     } catch (e: unknown) { setError(e instanceof Error ? e.message : 'Allocation failed'); }
     finally { setAllocating(false); }
   };
 
   const handleRedeem = async (posId: string) => {
-    try { await redeemRwaPosition(posId); await fetchAll(); }
+    try { await redeemRwaPosition(posId); await fetchAll(false); }
     catch (e: unknown) { setError(e instanceof Error ? e.message : 'Redeem failed'); }
   };
 
   const handleRebalance = async () => {
-    try { await triggerRebalance(); await fetchAll(); }
+    try { await triggerRebalance(); await fetchAll(false); }
     catch (e: unknown) { setError(e instanceof Error ? e.message : 'Rebalance failed'); }
   };
 
   const handleSeed = async () => {
-    try { await seedTreasuryPositions(); await fetchAll(); }
+    try { await seedTreasuryPositions(); await fetchAll(false); }
     catch (e: unknown) { setError(e instanceof Error ? e.message : 'Seed failed'); }
   };
 
   const handleDeposit = async () => {
     if (!depositAmt) return;
     setGwLoading(true);
-    try { await createDeposit(parseFloat(depositAmt)); setDepositAmt(''); await fetchAll(); }
+    try { await createDeposit(parseFloat(depositAmt)); setDepositAmt(''); await fetchAll(false); }
     catch (e: unknown) { setError(e instanceof Error ? e.message : 'Deposit failed'); }
     finally { setGwLoading(false); }
   };
@@ -137,7 +137,7 @@ export default function TreasuryPage() {
   const handleWithdraw = async () => {
     if (!withdrawAmt) return;
     setGwLoading(true);
-    try { await createWithdrawal(parseFloat(withdrawAmt)); setWithdrawAmt(''); await fetchAll(); }
+    try { await createWithdrawal(parseFloat(withdrawAmt)); setWithdrawAmt(''); await fetchAll(false); }
     catch (e: unknown) { setError(e instanceof Error ? e.message : 'Withdrawal failed'); }
     finally { setGwLoading(false); }
   };
