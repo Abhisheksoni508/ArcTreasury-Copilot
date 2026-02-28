@@ -584,6 +584,7 @@ export default function TreasuryPage() {
                   <tr className="text-left text-xs text-slate-400 border-b border-slate-100">
                     <th className="pb-2 font-semibold">Type</th>
                     <th className="pb-2 font-semibold">Fiat</th>
+                    <th className="pb-2 font-semibold">FX → USD</th>
                     <th className="pb-2 font-semibold">USDC</th>
                     <th className="pb-2 font-semibold">Rail</th>
                     <th className="pb-2 font-semibold">Status</th>
@@ -591,24 +592,35 @@ export default function TreasuryPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {gatewayTxns.map(tx => (
-                    <tr key={tx.id} className="border-b border-slate-50">
-                      <td className="py-2">
-                        <span className={`px-2 py-1 rounded-lg text-xs font-bold ${tx.type === 'DEPOSIT' ? 'bg-emerald-50 text-emerald-700' : 'bg-blue-50 text-blue-700'}`}>
-                          {tx.type === 'DEPOSIT' ? <span className="flex items-center gap-1"><ArrowDown size={14} /> Deposit</span> : <span className="flex items-center gap-1"><ArrowUp size={14} /> Withdraw</span>}
-                        </span>
-                      </td>
-                      <td className="py-2 font-bold">{tx.fiat_currency} {tx.fiat_amount.toLocaleString()}</td>
-                      <td className="py-2 font-bold text-cyan-600">{tx.usdc_amount.toLocaleString()} USDC</td>
-                      <td className="py-2 capitalize">{tx.rail}</td>
-                      <td className="py-2">
-                        <span className={`px-2 py-1 rounded-lg text-xs font-bold ${tx.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
-                          {tx.status}
-                        </span>
-                      </td>
-                      <td className="py-2 text-slate-400 text-xs">{new Date(tx.created_at).toLocaleString()}</td>
-                    </tr>
-                  ))}
+                  {gatewayTxns.map(tx => {
+                    const fxRate = gatewayInfo?.fx_rates?.[tx.fiat_currency] ?? 1;
+                    const isNonUsd = tx.fiat_currency !== 'USD';
+                    return (
+                      <tr key={tx.id} className="border-b border-slate-50">
+                        <td className="py-2">
+                          <span className={`px-2 py-1 rounded-lg text-xs font-bold ${tx.type === 'DEPOSIT' ? 'bg-emerald-50 text-emerald-700' : 'bg-blue-50 text-blue-700'}`}>
+                            {tx.type === 'DEPOSIT' ? <span className="flex items-center gap-1"><ArrowDown size={14} /> Deposit</span> : <span className="flex items-center gap-1"><ArrowUp size={14} /> Withdraw</span>}
+                          </span>
+                        </td>
+                        <td className="py-2 font-bold">{tx.fiat_currency} {tx.fiat_amount.toLocaleString()}</td>
+                        <td className="py-2 text-xs">
+                          {isNonUsd ? (
+                            <span className="text-slate-500">×{fxRate} = <strong className="text-slate-700">${(tx.fiat_amount * fxRate).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></span>
+                          ) : (
+                            <span className="text-slate-300">—</span>
+                          )}
+                        </td>
+                        <td className="py-2 font-bold text-cyan-600">{tx.usdc_amount.toLocaleString()} USDC</td>
+                        <td className="py-2 capitalize">{tx.rail}</td>
+                        <td className="py-2">
+                          <span className={`px-2 py-1 rounded-lg text-xs font-bold ${tx.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
+                            {tx.status}
+                          </span>
+                        </td>
+                        <td className="py-2 text-slate-400 text-xs">{new Date(tx.created_at).toLocaleString()}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
