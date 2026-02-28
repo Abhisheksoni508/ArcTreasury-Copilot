@@ -1,11 +1,10 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Package, Search, Zap, Bot, ClipboardList, Settings as SettingsIcon, Landmark } from 'lucide-react';
+import { LayoutDashboard, Package, Zap, Bot, ClipboardList, Settings as SettingsIcon, Landmark } from 'lucide-react';
 import AnimatedLogo from './AnimatedLogo';
 
 const NAV = [
   { to: '/', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
   { to: '/batches', label: 'Batches', icon: <Package size={18} /> },
-  { to: '/review', label: 'Review Queue', icon: <Search size={18} /> },
   { to: '/execution', label: 'Execution', icon: <Zap size={18} /> },
   { to: '/agent', label: 'Copilot Agent', icon: <Bot size={18} /> },
   { to: '/treasury', label: 'Treasury & RWA', icon: <Landmark size={18} /> },
