@@ -193,3 +193,29 @@ class SettingsResponse(BaseModel):
     circle_sandbox: bool = True
     circle_wallet_configured: bool = False
     arc_chain: str = "ARC-TESTNET"
+
+
+# ── Agent Models ───────────────────────────────────────────────────────
+
+class AgentActivityResponse(BaseModel):
+    id: str
+    action: str
+    entity_type: str
+    entity_id: str
+    details: str
+    strategy: str
+    timestamp: str
+
+
+class AgentStatusResponse(BaseModel):
+    running: bool
+    strategy: str
+    cycle_count: int
+    last_cycle_at: Optional[str] = None
+    strategy_config: dict = {}
+    available_strategies: list[str] = []
+
+
+class AgentControlRequest(BaseModel):
+    action: str  # "start" | "stop"
+    strategy: Optional[str] = "balanced"

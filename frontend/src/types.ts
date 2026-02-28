@@ -138,3 +138,33 @@ export interface Settings {
   circle_wallet_configured: boolean;
   arc_chain: string;
 }
+
+// ── Agent Types ────────────────────────────────────────────────────────
+
+export interface AgentActivity {
+  id: string;
+  action: string;
+  entity_type: string;
+  entity_id: string;
+  details: string;
+  strategy: string;
+  timestamp: string;
+}
+
+export interface AgentStatus {
+  running: boolean;
+  strategy: string;
+  cycle_count: number;
+  last_cycle_at: string | null;
+  strategy_config: Record<string, unknown>;
+  available_strategies: string[];
+}
+
+export interface AgentStrategyInfo {
+  description: string;
+  auto_approve_max_risk: number;
+  auto_approve_max_amount: number;
+  auto_approve_decisions: string[];
+  max_retries: number;
+  loop_interval: number;
+}
