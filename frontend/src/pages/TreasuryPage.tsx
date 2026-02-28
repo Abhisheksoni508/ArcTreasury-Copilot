@@ -1,4 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
+import { 
+  Landmark, Coins, Building2, Home, ArrowRightLeft, Waypoints, Sprout, Scale, 
+  Banknote, BarChart3, TrendingUp, Gem, PieChart, FileText, Radio, ClipboardList, 
+  Globe, Hexagon, Diamond, Circle, Disc, Square, Triangle, Shuffle, Zap, ArrowDown, ArrowUp 
+} from 'lucide-react';
+
 import {
   getTreasuryOverview, getRwaCatalog, allocateToRwa, redeemRwaPosition,
   triggerRebalance, seedTreasuryPositions,
@@ -22,11 +28,11 @@ const RISK_COLORS: Record<string, string> = {
   'BBB+': 'text-amber-700 bg-amber-50 border-amber-200',
 };
 
-const CAT_ICONS: Record<string, string> = {
-  government_bond: '🏛️',
-  money_market: '💰',
-  corporate_bond: '🏢',
-  real_estate: '🏠',
+const CAT_ICONS: Record<string, React.ReactNode> = {
+  government_bond: <Landmark size={18} />,
+  money_market: <Coins size={18} />,
+  corporate_bond: <Building2 size={18} />,
+  real_estate: <Home size={18} />,
 };
 
 // ── Component ───────────────────────────────────────────────────────────
@@ -155,10 +161,10 @@ export default function TreasuryPage() {
         </div>
         <div className="flex gap-2">
           <button onClick={handleSeed} className="px-4 py-2 bg-purple-100 text-purple-700 rounded-xl text-sm font-bold hover:bg-purple-200 transition-colors border border-purple-200">
-            🌱 Seed RWA Demo
+            <div className="flex items-center gap-2"><Sprout size={16} /> Seed RWA Demo</div>
           </button>
           <button onClick={handleRebalance} className="px-4 py-2 bg-cyan-100 text-cyan-700 rounded-xl text-sm font-bold hover:bg-cyan-200 transition-colors border border-cyan-200">
-            ⚖️ Auto-Rebalance
+            <div className="flex items-center gap-2"><Scale size={16} /> Auto-Rebalance</div>
           </button>
         </div>
       </div>
@@ -174,7 +180,7 @@ export default function TreasuryPage() {
         {(['treasury', 'gateway', 'bridge'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${tab === t ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
-            {t === 'treasury' ? '🏦 RWA Treasury' : t === 'gateway' ? '🏧 Circle Gateway' : '🌉 CCTP Bridge'}
+            {t === 'treasury' ? <span className="flex items-center gap-2"><Landmark size={18} /> RWA Treasury</span> : t === 'gateway' ? <span className="flex items-center gap-2"><ArrowRightLeft size={18} /> Circle Gateway</span> : <span className="flex items-center gap-2"><Waypoints size={18} /> CCTP Bridge</span>}
           </button>
         ))}
       </div>
@@ -206,11 +212,11 @@ export default function TreasuryPage() {
 
           {/* Stats Row */}
           <div className="grid grid-cols-5 gap-4">
-            <StatCard label="Total AUM" value={usd(overview.total_aum)} icon="🏦" />
-            <StatCard label="Liquid USDC" value={usd(overview.usdc_liquid)} icon="💵" accent="text-cyan-600" />
-            <StatCard label="RWA Holdings" value={usd(overview.total_rwa_current_value)} icon="📊" accent="text-purple-600" />
-            <StatCard label="Accrued Yield" value={usd(overview.total_accrued_yield)} icon="📈" accent="text-emerald-600" />
-            <StatCard label="Avg APY" value={`${overview.weighted_avg_apy}%`} icon="💎" accent="text-amber-600" />
+            <StatCard label="Total AUM" value={usd(overview.total_aum)} icon={<Landmark size={24} className="text-slate-400" />} />
+            <StatCard label="Liquid USDC" value={usd(overview.usdc_liquid)} icon={<Banknote size={24} className="text-cyan-600" />} accent="text-cyan-600" />
+            <StatCard label="RWA Holdings" value={usd(overview.total_rwa_current_value)} icon={<BarChart3 size={24} className="text-purple-600" />} accent="text-purple-600" />
+            <StatCard label="Accrued Yield" value={usd(overview.total_accrued_yield)} icon={<TrendingUp size={24} className="text-emerald-600" />} accent="text-emerald-600" />
+            <StatCard label="Avg APY" value={`${overview.weighted_avg_apy}%`} icon={<Gem size={24} className="text-amber-600" />} accent="text-amber-600" />
           </div>
 
           {/* Reserve Ratio Bar */}
@@ -239,7 +245,7 @@ export default function TreasuryPage() {
           <div className="grid grid-cols-2 gap-6">
             {/* RWA Positions */}
             <div className="bg-white/60 backdrop-blur rounded-2xl p-5 border border-white shadow-sm">
-              <h3 className="font-extrabold text-slate-900 mb-4">📊 Active RWA Positions</h3>
+              <h3 className="font-extrabold text-slate-900 mb-4"><span className="flex items-center gap-2"><BarChart3 size={20} /> Active RWA Positions</span></h3>
               {overview.positions.length === 0 ? (
                 <p className="text-slate-400 text-sm">No positions yet. Click "Seed RWA Demo" or allocate below.</p>
               ) : (
@@ -248,7 +254,7 @@ export default function TreasuryPage() {
                     <div key={pos.id} className="bg-gradient-to-r from-slate-50 to-white rounded-xl p-4 border border-slate-100 hover:border-purple-200 transition-colors">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
-                          <span>{CAT_ICONS[pos.category] || '📄'}</span>
+                          <span>{CAT_ICONS[pos.category] || <FileText size={18} />}</span>
                           <span className="font-bold text-slate-800 text-sm">{pos.asset_name}</span>
                           <span className={`text-xs px-2 py-0.5 rounded-lg font-bold border ${RISK_COLORS[pos.risk_rating] || 'text-slate-500 bg-slate-50 border-slate-200'}`}>
                             {pos.risk_rating}
@@ -273,14 +279,14 @@ export default function TreasuryPage() {
 
             {/* RWA Catalog + Allocate */}
             <div className="bg-white/60 backdrop-blur rounded-2xl p-5 border border-white shadow-sm">
-              <h3 className="font-extrabold text-slate-900 mb-4">🏦 Allocate to RWA</h3>
+              <h3 className="font-extrabold text-slate-900 mb-4"><span className="flex items-center gap-2"><Landmark size={20} /> Allocate to RWA</span></h3>
               <div className="space-y-3 mb-4">
                 {catalog.map(asset => (
                   <button key={asset.symbol} onClick={() => setAllocAsset(asset.symbol)}
                     className={`w-full text-left rounded-xl p-3 border transition-all ${allocAsset === asset.symbol ? 'border-purple-400 bg-purple-50' : 'border-slate-100 bg-slate-50 hover:border-slate-300'}`}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span>{CAT_ICONS[asset.category] || '📄'}</span>
+                        <span>{CAT_ICONS[asset.category] || <FileText size={18} />}</span>
                         <span className="font-bold text-sm">{asset.name}</span>
                       </div>
                       <span className="text-sm font-extrabold text-purple-600">{asset.apy}% APY</span>
@@ -310,12 +316,12 @@ export default function TreasuryPage() {
           {/* Category Breakdown */}
           {Object.keys(overview.category_breakdown).length > 0 && (
             <div className="bg-white/60 backdrop-blur rounded-2xl p-5 border border-white shadow-sm">
-              <h3 className="font-extrabold text-slate-900 mb-4">📈 Asset Allocation Breakdown</h3>
+              <h3 className="font-extrabold text-slate-900 mb-4"><span className="flex items-center gap-2"><PieChart size={20} /> Asset Allocation Breakdown</span></h3>
               <div className="grid grid-cols-4 gap-4">
                 {Object.entries(overview.category_breakdown).map(([cat, data]) => (
                   <div key={cat} className="bg-gradient-to-br from-slate-50 to-white rounded-xl p-4 border border-slate-100">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-lg">{CAT_ICONS[cat] || '📄'}</span>
+                      <span className="text-lg">{CAT_ICONS[cat] || <FileText size={18} />}</span>
                       <span className="font-bold text-sm text-slate-700 capitalize">{cat.replace('_', ' ')}</span>
                     </div>
                     <div className="text-2xl font-extrabold text-slate-900">{usd(data.current_value)}</div>
@@ -342,7 +348,7 @@ export default function TreasuryPage() {
         <>
           <div className="bg-white/60 backdrop-blur rounded-2xl p-6 border border-white shadow-sm">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-2xl shadow-lg">🏧</div>
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-2xl shadow-lg"><ArrowRightLeft size={28} className="text-white" /></div>
               <div>
                 <h3 className="font-extrabold text-lg text-slate-900">{gatewayInfo.provider}</h3>
                 <p className="text-sm text-slate-500">{gatewayInfo.description}</p>
@@ -351,7 +357,7 @@ export default function TreasuryPage() {
             <div className="grid grid-cols-2 gap-6">
               {/* On-ramp Flow */}
               <div className="bg-emerald-50/50 rounded-xl p-4 border border-emerald-200">
-                <h4 className="font-bold text-emerald-800 mb-3">💰 Fiat → USDC (On-Ramp)</h4>
+                <h4 className="font-bold text-emerald-800 mb-3"><span className="flex items-center gap-2"><Banknote size={16} /> Fiat → USDC (On-Ramp)</span></h4>
                 <ol className="space-y-2 text-sm text-emerald-700">
                   {gatewayInfo.treasury_integration.on_ramp_flow.map((step, i) => (
                     <li key={i} className="flex gap-2"><span className="text-emerald-400 font-mono text-xs mt-0.5">{step.slice(0, 2)}</span>{step.slice(3)}</li>
@@ -368,7 +374,7 @@ export default function TreasuryPage() {
               </div>
               {/* Off-ramp Flow */}
               <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-200">
-                <h4 className="font-bold text-blue-800 mb-3">🏦 USDC → Fiat (Off-Ramp)</h4>
+                <h4 className="font-bold text-blue-800 mb-3"><span className="flex items-center gap-2"><Landmark size={16} /> USDC → Fiat (Off-Ramp)</span></h4>
                 <ol className="space-y-2 text-sm text-blue-700">
                   {gatewayInfo.treasury_integration.off_ramp_flow.map((step, i) => (
                     <li key={i} className="flex gap-2"><span className="text-blue-400 font-mono text-xs mt-0.5">{step.slice(0, 2)}</span>{step.slice(3)}</li>
@@ -388,7 +394,7 @@ export default function TreasuryPage() {
 
           {/* Payment Rails */}
           <div className="bg-white/60 backdrop-blur rounded-2xl p-5 border border-white shadow-sm">
-            <h3 className="font-extrabold text-slate-900 mb-4">📡 Supported Payment Rails</h3>
+            <h3 className="font-extrabold text-slate-900 mb-4"><span className="flex items-center gap-2"><Radio size={20} /> Supported Payment Rails</span></h3>
             <div className="grid grid-cols-3 gap-4">
               {Object.entries(gatewayInfo.payment_rails).map(([key, rail]) => (
                 <div key={key} className="bg-gradient-to-br from-slate-50 to-white rounded-xl p-4 border border-slate-100">
@@ -407,7 +413,7 @@ export default function TreasuryPage() {
           {/* Gateway Transactions */}
           {gatewayTxns.length > 0 && (
             <div className="bg-white/60 backdrop-blur rounded-2xl p-5 border border-white shadow-sm">
-              <h3 className="font-extrabold text-slate-900 mb-4">📋 Gateway Transactions</h3>
+              <h3 className="font-extrabold text-slate-900 mb-4"><span className="flex items-center gap-2"><ClipboardList size={20} /> Gateway Transactions</span></h3>
               <table className="w-full text-sm">
                 <thead>
                   <tr className="text-left text-xs text-slate-400 border-b border-slate-100">
@@ -424,7 +430,7 @@ export default function TreasuryPage() {
                     <tr key={tx.id} className="border-b border-slate-50">
                       <td className="py-2">
                         <span className={`px-2 py-1 rounded-lg text-xs font-bold ${tx.type === 'DEPOSIT' ? 'bg-emerald-50 text-emerald-700' : 'bg-blue-50 text-blue-700'}`}>
-                          {tx.type === 'DEPOSIT' ? '↓ Deposit' : '↑ Withdraw'}
+                          {tx.type === 'DEPOSIT' ? <span className="flex items-center gap-1"><ArrowDown size={14} /> Deposit</span> : <span className="flex items-center gap-1"><ArrowUp size={14} /> Withdraw</span>}
                         </span>
                       </td>
                       <td className="py-2 font-bold">{tx.fiat_currency} {tx.fiat_amount.toLocaleString()}</td>
@@ -450,7 +456,7 @@ export default function TreasuryPage() {
         <>
           {/* CCTP Domain Map */}
           <div className="bg-white/60 backdrop-blur rounded-2xl p-5 border border-white shadow-sm">
-            <h3 className="font-extrabold text-slate-900 mb-4">🌐 CCTP Domain Registry</h3>
+            <h3 className="font-extrabold text-slate-900 mb-4"><span className="flex items-center gap-2"><Globe size={20} /> CCTP Domain Registry</span></h3>
             <p className="text-sm text-slate-500 mb-4">
               Circle's Cross-Chain Transfer Protocol V2 enables native USDC transfers across blockchains
               via burn-attest-mint. Each chain has a unique CCTP domain.
@@ -458,7 +464,16 @@ export default function TreasuryPage() {
             <div className="grid grid-cols-7 gap-3">
               {Object.entries(domains).map(([chain, info]) => (
                 <div key={chain} className={`rounded-xl p-3 border text-center transition-all ${chain === 'arc' ? 'bg-purple-50 border-purple-300 ring-2 ring-purple-200' : 'bg-slate-50 border-slate-200'}`}>
-                  <div className="text-lg mb-1">{chain === 'arc' ? '⬡' : chain === 'ethereum' ? 'Ξ' : chain === 'polygon' ? '🟣' : chain === 'solana' ? '◎' : chain === 'arbitrum' ? '🔵' : chain === 'base' ? '🔷' : '🔺'}</div>
+                  
+                 <div className="flex justify-center mb-2">
+                    {chain === 'arc' ? <Hexagon size={24} className="text-purple-600" /> : 
+                     chain === 'ethereum' ? <Diamond size={24} className="text-blue-500" /> : 
+                     chain === 'polygon' ? <Circle size={24} className="text-purple-500" /> : 
+                     chain === 'solana' ? <Disc size={24} className="text-green-500" /> : 
+                     chain === 'arbitrum' ? <Circle size={24} className="text-blue-500" /> : 
+                     chain === 'base' ? <div className="rotate-45"><Square size={24} className="text-blue-600" /></div> : 
+                     <Triangle size={24} className="text-red-500" />}
+                  </div>
                   <div className="font-bold text-sm capitalize">{chain}</div>
                   <div className="text-xs text-slate-400 mt-1">Domain <strong>{info.domain}</strong></div>
                   <div className="text-xs text-slate-400">Chain {info.testnet_chain_id}</div>
@@ -469,7 +484,7 @@ export default function TreasuryPage() {
 
           {/* Route Planner */}
           <div className="bg-white/60 backdrop-blur rounded-2xl p-5 border border-white shadow-sm">
-            <h3 className="font-extrabold text-slate-900 mb-4">🔀 Bridge Route Planner</h3>
+            <h3 className="font-extrabold text-slate-900 mb-4"><span className="flex items-center gap-2"><Shuffle size={20} /> Bridge Route Planner</span></h3>
             <div className="flex gap-3 items-end">
               <div>
                 <label className="text-xs font-bold text-slate-500 mb-1 block">Source</label>
@@ -502,7 +517,7 @@ export default function TreasuryPage() {
               <div className="mt-5 bg-indigo-50/50 rounded-xl p-5 border border-indigo-200">
                 <div className="flex items-center justify-between mb-3">
                   <span className="font-bold text-indigo-800">
-                    {bridgePlan.type === 'DIRECT' ? '⚡ Direct Transfer' : '🌉 CCTP Bridge Route'}
+                    {bridgePlan.type === 'DIRECT' ? <span className="flex items-center gap-1.5"><Zap size={16} /> Direct Transfer</span> : <span className="flex items-center gap-1.5"><Waypoints size={16} /> CCTP Bridge Route</span>}
                   </span>
                   {bridgePlan.fee_usdc !== undefined && (
                     <span className="text-sm text-indigo-600">Fee: <strong>{bridgePlan.fee_usdc} USDC</strong> · Net: <strong>{bridgePlan.net_amount} USDC</strong></span>
@@ -531,7 +546,7 @@ export default function TreasuryPage() {
 
           {/* Supported Routes Table */}
           <div className="bg-white/60 backdrop-blur rounded-2xl p-5 border border-white shadow-sm">
-            <h3 className="font-extrabold text-slate-900 mb-4">📡 All CCTP Routes ({routes.length})</h3>
+            <h3 className="font-extrabold text-slate-900 mb-4"><span className="flex items-center gap-2"><Radio size={20} /> All CCTP Routes ({routes.length})</span></h3>
             <div className="max-h-72 overflow-y-auto">
               <table className="w-full text-sm">
                 <thead className="sticky top-0 bg-white">
@@ -567,7 +582,7 @@ export default function TreasuryPage() {
 
 // ── Sub-components ──────────────────────────────────────────────────────
 
-function StatCard({ label, value, icon, accent }: { label: string; value: string | number; icon: string; accent?: string }) {
+function StatCard({ label, value, icon, accent }: { label: string; value: string | number; icon: React.ReactNode; accent?: string }) {
   return (
     <div className="bg-white/60 backdrop-blur rounded-2xl p-4 border border-white shadow-sm">
       <div className="flex items-center justify-between mb-1">
