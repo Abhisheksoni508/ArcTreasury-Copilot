@@ -289,7 +289,7 @@ export default function BatchPage() {
           {isAutopilot && step !== 'complete' && (
             <button
               onClick={() => { setStep('idle'); }}
-              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50"
+              className="px-4 py-2 border dark:border-slate-800 border-gray-300 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 dark:bg-slate-800/50"
             >
               Exit AutoPilot
             </button>
@@ -299,7 +299,7 @@ export default function BatchPage() {
               <button
                 onClick={handleSeedManual}
                 disabled={!!loading}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 disabled:opacity-50"
+                className="px-4 py-2 border dark:border-slate-800 border-gray-300 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 dark:bg-slate-800/50 disabled:opacity-50"
               >
                 {loading === 'seed' ? 'Seeding...' : 'Seed (Manual)'}
               </button>
@@ -325,7 +325,7 @@ export default function BatchPage() {
 
       {/* ── Error banner ──────────────────────────────────────────────── */}
       {error && (
-        <div className="flex items-center gap-2 px-4 py-3 rounded-lg text-sm bg-red-50 text-red-700 border border-red-200">
+        <div className="flex items-center gap-2 px-4 py-3 rounded-lg text-sm bg-red-50 text-red-700 border dark:border-slate-800 border-red-200">
           <AlertCircle size={16} /> {error}
         </div>
       )}
@@ -345,7 +345,7 @@ export default function BatchPage() {
           <StepIndicator current={step} />
 
           {/* ── Step 1: Seeding ───────────────────────────────────────── */}
-          <div className={`bg-white rounded-xl shadow-sm border overflow-hidden transition-all duration-500
+          <div className={`bg-white dark:bg-slate-900 rounded-xl shadow-sm border dark:border-slate-800 overflow-hidden transition-all duration-500
             ${stepIndex(step) >= 0 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             <div className="px-5 py-4 flex items-center gap-3">
               <span className="text-green-600 bg-green-50 p-2 rounded-xl"><Leaf size={24} /></span>
@@ -377,7 +377,7 @@ export default function BatchPage() {
 
           {/* ── Step 2: Policy Engine ─────────────────────────────────── */}
           {stepIndex(step) >= stepIndex('seeded') && (
-            <div className={`bg-white rounded-xl shadow-sm border overflow-hidden transition-all duration-500
+            <div className={`bg-white dark:bg-slate-900 rounded-xl shadow-sm border dark:border-slate-800 overflow-hidden transition-all duration-500
               ${stepIndex(step) >= stepIndex('seeded') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
               <div className="px-5 py-4 flex items-center gap-3">
                 <span className="text-purple-600 bg-purple-50 p-2 rounded-xl"><ShieldAlert size={24} /></span>
@@ -394,7 +394,7 @@ export default function BatchPage() {
                       </div>
                       <div className="grid grid-cols-3 gap-2 mt-2">
                         {['Checking amount limits...', 'Scoring recipient risk...', 'Validating compliance...'].map((t, i) => (
-                          <div key={i} className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 rounded px-3 py-2">
+                          <div key={i} className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 dark:bg-slate-800/50 rounded px-3 py-2">
                             <Spinner className="w-3 h-3 text-gray-400" /> {t}
                           </div>
                         ))}
@@ -416,7 +416,7 @@ export default function BatchPage() {
                                 d === 'REVIEW' ? 'bg-yellow-100 text-yellow-700' :
                                   d === 'REJECTED' ? 'bg-red-100 text-red-700' :
                                     d === 'HELD' ? 'bg-orange-100 text-orange-700' :
-                                      'bg-gray-100 text-gray-700'}`}>
+                                      'bg-gray-100 text-gray-700 dark:text-gray-300'}`}>
                               {c} {d}
                             </span>
                           ));
@@ -440,7 +440,7 @@ export default function BatchPage() {
 
           {/* ── Step 3: Batch Execution ───────────────────────────────── */}
           {stepIndex(step) >= stepIndex('policy-done') && (
-            <div className={`bg-white rounded-xl shadow-sm border overflow-hidden transition-all duration-500
+            <div className={`bg-white dark:bg-slate-900 rounded-xl shadow-sm border dark:border-slate-800 overflow-hidden transition-all duration-500
               ${stepIndex(step) >= stepIndex('policy-done') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
               <div className="px-5 py-4 flex items-center gap-3">
                 <span className="text-blue-600 bg-blue-50 p-2 rounded-xl"><Zap size={24} /></span>
@@ -477,7 +477,7 @@ export default function BatchPage() {
                             <span key={s} className={`px-3 py-1 rounded-full text-xs font-medium
                               ${s === 'PROCESSING' || s === 'SETTLED' ? 'bg-green-100 text-green-700' :
                                 s === 'FAILED' ? 'bg-red-100 text-red-700' :
-                                  'bg-gray-100 text-gray-700'}`}>
+                                  'bg-gray-100 text-gray-700 dark:text-gray-300'}`}>
                               {c} {s}
                             </span>
                           ));
@@ -501,7 +501,7 @@ export default function BatchPage() {
 
           {/* ── Step 4: Review Queue (inline) ─────────────────────────── */}
           {step === 'review' && reviewItems.length > 0 && (
-            <div className="bg-white rounded-xl shadow-sm border overflow-hidden transition-all duration-500 border-yellow-300">
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border dark:border-slate-800 overflow-hidden transition-all duration-500 border-yellow-300">
               <div className="px-5 py-4 bg-yellow-50 border-b border-yellow-200">
                 <div className="flex items-center gap-3">
                   <span className="text-yellow-600 bg-yellow-100 p-2 rounded-xl"><Eye size={24} /></span>
@@ -517,7 +517,7 @@ export default function BatchPage() {
               </div>
               <div className="divide-y">
                 {reviewItems.map(item => (
-                  <div key={item.id} className="px-5 py-4 hover:bg-gray-50 transition-colors">
+                  <div key={item.id} className="px-5 py-4 hover:bg-gray-50 dark:bg-slate-800/50 transition-colors">
                     <div className="flex items-start justify-between">
                       <div className="space-y-2">
                         <div className="flex items-center gap-3">
@@ -527,7 +527,7 @@ export default function BatchPage() {
                         </div>
                         <div className="text-sm text-gray-500 space-y-1">
                           <div>
-                            <span className="font-medium text-gray-700 text-lg">${item.amount.toLocaleString()}</span>{' '}
+                            <span className="font-medium text-gray-700 dark:text-gray-300 text-lg">${item.amount.toLocaleString()}</span>{' '}
                             {item.currency} — <span className="capitalize">{item.category.replace('_', ' ')}</span>
                           </div>
                           <div className="font-mono text-xs text-gray-400">{item.recipient_address}</div>
@@ -567,7 +567,7 @@ export default function BatchPage() {
           {step === 'complete' && (
             <div className="space-y-6 transition-all duration-500">
               {/* Success banner */}
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200 px-6 py-5">
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border dark:border-slate-800 border-green-200 px-6 py-5">
                 <div className="flex items-center gap-3 mb-3">
                   <span className="text-emerald-600 bg-emerald-100 p-2 rounded-xl"><CheckCircle2 size={28} /></span>
                   <div>
@@ -578,15 +578,15 @@ export default function BatchPage() {
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-4 mt-4">
-                  <div className="bg-white rounded-lg px-4 py-3 border border-green-200">
+                  <div className="bg-white dark:bg-slate-900 rounded-lg px-4 py-3 border dark:border-slate-800 border-green-200">
                     <div className="text-xs text-gray-500 uppercase font-medium">Items Seeded</div>
-                    <div className="text-2xl font-bold text-gray-800">{seedRes?.items_created ?? 0}</div>
+                    <div className="text-2xl font-bold text-gray-800 dark:text-gray-200">{seedRes?.items_created ?? 0}</div>
                   </div>
-                  <div className="bg-white rounded-lg px-4 py-3 border border-green-200">
+                  <div className="bg-white dark:bg-slate-900 rounded-lg px-4 py-3 border dark:border-slate-800 border-green-200">
                     <div className="text-xs text-gray-500 uppercase font-medium">Items Executed</div>
-                    <div className="text-2xl font-bold text-gray-800">{execRes?.executed ?? 0}</div>
+                    <div className="text-2xl font-bold text-gray-800 dark:text-gray-200">{execRes?.executed ?? 0}</div>
                   </div>
-                  <div className="bg-white rounded-lg px-4 py-3 border border-green-200">
+                  <div className="bg-white dark:bg-slate-900 rounded-lg px-4 py-3 border dark:border-slate-800 border-green-200">
                     <div className="text-xs text-gray-500 uppercase font-medium">Failed</div>
                     <div className="text-2xl font-bold text-red-600">{failedItems.length}</div>
                   </div>
@@ -595,7 +595,7 @@ export default function BatchPage() {
 
               {/* Failed items with retry */}
               {failedItems.length > 0 && (
-                <div className="bg-white rounded-xl shadow-sm border border-red-200 overflow-hidden">
+                <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border dark:border-slate-800 border-red-200 overflow-hidden">
                   <div className="px-5 py-4 bg-red-50 border-b border-red-200">
                     <div className="flex items-center gap-3">
                       <span className="text-red-600 bg-red-100 p-2 rounded-xl"><AlertTriangle size={24} /></span>
@@ -644,7 +644,7 @@ export default function BatchPage() {
               )}
 
               {failedItems.length === 0 && (
-                <div className="bg-green-50 rounded-xl border border-green-200 px-6 py-8 text-center flex flex-col items-center">
+                <div className="bg-green-50 rounded-xl border dark:border-slate-800 border-green-200 px-6 py-8 text-center flex flex-col items-center">
                   <span className="text-green-600 bg-green-200/50 p-4 rounded-full mb-3"><CheckCircle2 size={32} /></span>
                   <p className="text-green-700 font-medium tracking-wide">All executions succeeded — no complications!</p>
                 </div>
@@ -668,8 +668,8 @@ export default function BatchPage() {
                 <button
                   key={b.id}
                   onClick={() => setParams({ id: b.id })}
-                  className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors
-                    ${selectedId === b.id ? 'bg-blue-50 border-blue-300 text-blue-800' : 'bg-white hover:bg-gray-50'}`}
+                  className={`px-4 py-2 rounded-lg border dark:border-slate-800 text-sm font-medium transition-colors
+                    ${selectedId === b.id ? 'bg-blue-50 border-blue-300 text-blue-800' : 'bg-white dark:bg-slate-900 hover:bg-gray-50 dark:bg-slate-800/50'}`}
                 >
                   {b.name} <StatusBadge value={b.status} type="batch" />
                 </button>
@@ -679,7 +679,7 @@ export default function BatchPage() {
 
           {/* Batch detail */}
           {detail && (
-            <div className="bg-white rounded-xl shadow-sm border">
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border dark:border-slate-800">
               <div className="px-5 py-4 border-b flex items-center justify-between">
                 <div>
                   <h3 className="font-semibold text-lg">{detail.name}</h3>
@@ -713,7 +713,7 @@ export default function BatchPage() {
               {/* Items table */}
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
+                  <thead className="bg-gray-50 dark:bg-slate-800/50 text-gray-500 text-xs uppercase">
                     <tr>
                       <th className="px-4 py-3 text-left">Recipient</th>
                       <th className="px-4 py-3 text-right">Amount</th>
@@ -727,14 +727,14 @@ export default function BatchPage() {
                   </thead>
                   <tbody className="divide-y">
                     {detail.items.map(item => (
-                      <tr key={item.id} className="hover:bg-gray-50">
+                      <tr key={item.id} className="hover:bg-gray-50 dark:bg-slate-800/50">
                         <td className="px-4 py-3">
                           <div className="font-medium">{item.recipient_name}</div>
                           <div className="text-xs text-gray-400 font-mono truncate max-w-[180px]">{item.recipient_address}</div>
                         </td>
                         <td className="px-4 py-3 text-right font-mono font-medium">${item.amount.toLocaleString()}</td>
                         <td className="px-4 py-3"><ChainBadge chain={item.destination_chain} /></td>
-                        <td className="px-4 py-3 capitalize text-gray-600">{item.category.replace('_', ' ')}</td>
+                        <td className="px-4 py-3 capitalize text-gray-600 dark:text-gray-400">{item.category.replace('_', ' ')}</td>
                         <td className="px-4 py-3">
                           <StatusBadge value={item.decision} />
                           {item.decision_reason && (
@@ -763,7 +763,7 @@ export default function BatchPage() {
           {batches.length === 0 && (
             <div className="text-center py-16 text-gray-400 flex flex-col items-center">
               <span className="text-gray-300 bg-gray-100 p-4 rounded-3xl mb-4"><Ticket size={32} /></span>
-              <p className="text-lg font-medium text-gray-600">No batches yet</p>
+              <p className="text-lg font-medium text-gray-600 dark:text-gray-400">No batches yet</p>
               <p className="text-sm mt-1">Click <strong>"Seed &amp; AutoPilot"</strong> to see the full automated pipeline in action</p>
             </div>
           )}

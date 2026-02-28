@@ -160,17 +160,17 @@ export default function TreasuryPage() {
           <p className="text-slate-500 mt-1 font-medium">RWA-backed reserves, Circle Gateway fiat ramps, and CCTP bridge routing</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={handleSeed} className="px-4 py-2 bg-purple-100 text-purple-700 rounded-xl text-sm font-bold hover:bg-purple-200 transition-colors border border-purple-200">
+          <button onClick={handleSeed} className="px-4 py-2 bg-purple-100 text-purple-700 rounded-xl text-sm font-bold hover:bg-purple-200 transition-colors border dark:border-slate-800 border-purple-200">
             <div className="flex items-center gap-2"><Sprout size={16} /> Seed RWA Demo</div>
           </button>
-          <button onClick={handleRebalance} className="px-4 py-2 bg-cyan-100 text-cyan-700 rounded-xl text-sm font-bold hover:bg-cyan-200 transition-colors border border-cyan-200">
+          <button onClick={handleRebalance} className="px-4 py-2 bg-cyan-100 text-cyan-700 rounded-xl text-sm font-bold hover:bg-cyan-200 transition-colors border dark:border-slate-800 border-cyan-200">
             <div className="flex items-center gap-2"><Scale size={16} /> Auto-Rebalance</div>
           </button>
         </div>
       </div>
 
       {error && (
-        <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-sm font-semibold">{error}
+        <div className="bg-rose-50 border dark:border-slate-800 border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-sm font-semibold">{error}
           <button onClick={() => setError('')} className="ml-2 text-rose-400 hover:text-rose-600">✕</button>
         </div>
       )}
@@ -179,7 +179,7 @@ export default function TreasuryPage() {
       <div className="flex gap-1 bg-slate-100 p-1 rounded-xl w-fit">
         {(['treasury', 'gateway', 'bridge'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
-            className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${tab === t ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+            className={`px-5 py-2 rounded-lg text-sm font-bold transition-all ${tab === t ? 'bg-white dark:bg-slate-900 text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
             {t === 'treasury' ? <span className="flex items-center gap-2"><Landmark size={18} /> RWA Treasury</span> : t === 'gateway' ? <span className="flex items-center gap-2"><ArrowRightLeft size={18} /> Circle Gateway</span> : <span className="flex items-center gap-2"><Waypoints size={18} /> CCTP Bridge</span>}
           </button>
         ))}
@@ -220,7 +220,7 @@ export default function TreasuryPage() {
           </div>
 
           {/* Reserve Ratio Bar */}
-          <div className="bg-white/60 backdrop-blur rounded-2xl p-5 border border-white shadow-sm">
+          <div className="bg-white dark:bg-slate-900/60 backdrop-blur rounded-2xl p-5 border dark:border-slate-800 border-white shadow-sm">
             <div className="flex items-center justify-between mb-3">
               <span className="font-bold text-slate-700">Reserve Ratio</span>
               <span className="text-sm font-bold text-slate-500">{pct(overview.reserve_ratio)} liquid ({pct(overview.config.min_reserve_ratio)} minimum)</span>
@@ -244,24 +244,24 @@ export default function TreasuryPage() {
           {/* Allocation Section */}
           <div className="grid grid-cols-2 gap-6">
             {/* RWA Positions */}
-            <div className="bg-white/60 backdrop-blur rounded-2xl p-5 border border-white shadow-sm">
+            <div className="bg-white dark:bg-slate-900/60 backdrop-blur rounded-2xl p-5 border dark:border-slate-800 border-white shadow-sm">
               <h3 className="font-extrabold text-slate-900 mb-4"><span className="flex items-center gap-2"><BarChart3 size={20} /> Active RWA Positions</span></h3>
               {overview.positions.length === 0 ? (
                 <p className="text-slate-400 text-sm">No positions yet. Click "Seed RWA Demo" or allocate below.</p>
               ) : (
                 <div className="space-y-3 max-h-80 overflow-y-auto">
                   {overview.positions.map(pos => (
-                    <div key={pos.id} className="bg-gradient-to-r from-slate-50 to-white rounded-xl p-4 border border-slate-100 hover:border-purple-200 transition-colors">
+                    <div key={pos.id} className="bg-gradient-to-r from-slate-50 to-white rounded-xl p-4 border dark:border-slate-800 border-slate-100 hover:border-purple-200 transition-colors">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <span>{CAT_ICONS[pos.category] || <FileText size={18} />}</span>
                           <span className="font-bold text-slate-800 text-sm">{pos.asset_name}</span>
-                          <span className={`text-xs px-2 py-0.5 rounded-lg font-bold border ${RISK_COLORS[pos.risk_rating] || 'text-slate-500 bg-slate-50 border-slate-200'}`}>
+                          <span className={`text-xs px-2 py-0.5 rounded-lg font-bold border dark:border-slate-800 ${RISK_COLORS[pos.risk_rating] || 'text-slate-500 bg-slate-50 border-slate-200'}`}>
                             {pos.risk_rating}
                           </span>
                         </div>
                         <button onClick={() => handleRedeem(pos.id)}
-                          className="text-xs px-3 py-1 bg-rose-50 text-rose-600 rounded-lg font-bold hover:bg-rose-100 border border-rose-200 transition-colors">
+                          className="text-xs px-3 py-1 bg-rose-50 text-rose-600 rounded-lg font-bold hover:bg-rose-100 border dark:border-slate-800 border-rose-200 transition-colors">
                           Redeem
                         </button>
                       </div>
@@ -278,12 +278,12 @@ export default function TreasuryPage() {
             </div>
 
             {/* RWA Catalog + Allocate */}
-            <div className="bg-white/60 backdrop-blur rounded-2xl p-5 border border-white shadow-sm">
+            <div className="bg-white dark:bg-slate-900/60 backdrop-blur rounded-2xl p-5 border dark:border-slate-800 border-white shadow-sm">
               <h3 className="font-extrabold text-slate-900 mb-4"><span className="flex items-center gap-2"><Landmark size={20} /> Allocate to RWA</span></h3>
               <div className="space-y-3 mb-4">
                 {catalog.map(asset => (
                   <button key={asset.symbol} onClick={() => setAllocAsset(asset.symbol)}
-                    className={`w-full text-left rounded-xl p-3 border transition-all ${allocAsset === asset.symbol ? 'border-purple-400 bg-purple-50' : 'border-slate-100 bg-slate-50 hover:border-slate-300'}`}>
+                    className={`w-full text-left rounded-xl p-3 border dark:border-slate-800 transition-all ${allocAsset === asset.symbol ? 'border-purple-400 bg-purple-50' : 'border-slate-100 bg-slate-50 hover:border-slate-300'}`}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span>{CAT_ICONS[asset.category] || <FileText size={18} />}</span>
@@ -303,7 +303,7 @@ export default function TreasuryPage() {
               {allocAsset && (
                 <div className="flex gap-2 mt-3">
                   <input type="number" value={allocAmount} onChange={e => setAllocAmount(e.target.value)}
-                    placeholder="Amount USDC" className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium" />
+                    placeholder="Amount USDC" className="flex-1 px-3 py-2 rounded-xl border dark:border-slate-800 border-slate-200 text-sm font-medium" />
                   <button onClick={handleAllocate} disabled={allocating}
                     className="px-5 py-2 bg-purple-600 text-white rounded-xl font-bold text-sm hover:bg-purple-700 disabled:opacity-50 transition-colors">
                     {allocating ? '...' : `Allocate to ${allocAsset}`}
@@ -315,11 +315,11 @@ export default function TreasuryPage() {
 
           {/* Category Breakdown */}
           {Object.keys(overview.category_breakdown).length > 0 && (
-            <div className="bg-white/60 backdrop-blur rounded-2xl p-5 border border-white shadow-sm">
+            <div className="bg-white dark:bg-slate-900/60 backdrop-blur rounded-2xl p-5 border dark:border-slate-800 border-white shadow-sm">
               <h3 className="font-extrabold text-slate-900 mb-4"><span className="flex items-center gap-2"><PieChart size={20} /> Asset Allocation Breakdown</span></h3>
               <div className="grid grid-cols-4 gap-4">
                 {Object.entries(overview.category_breakdown).map(([cat, data]) => (
-                  <div key={cat} className="bg-gradient-to-br from-slate-50 to-white rounded-xl p-4 border border-slate-100">
+                  <div key={cat} className="bg-gradient-to-br from-slate-50 to-white rounded-xl p-4 border dark:border-slate-800 border-slate-100">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-lg">{CAT_ICONS[cat] || <FileText size={18} />}</span>
                       <span className="font-bold text-sm text-slate-700 capitalize">{cat.replace('_', ' ')}</span>
@@ -346,7 +346,7 @@ export default function TreasuryPage() {
       {/* ═══════════════════ GATEWAY TAB ═══════════════════ */}
       {tab === 'gateway' && gatewayInfo && (
         <>
-          <div className="bg-white/60 backdrop-blur rounded-2xl p-6 border border-white shadow-sm">
+          <div className="bg-white dark:bg-slate-900/60 backdrop-blur rounded-2xl p-6 border dark:border-slate-800 border-white shadow-sm">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-2xl shadow-lg"><ArrowRightLeft size={28} className="text-white" /></div>
               <div>
@@ -356,7 +356,7 @@ export default function TreasuryPage() {
             </div>
             <div className="grid grid-cols-2 gap-6">
               {/* On-ramp Flow */}
-              <div className="bg-emerald-50/50 rounded-xl p-4 border border-emerald-200">
+              <div className="bg-emerald-50/50 rounded-xl p-4 border dark:border-slate-800 border-emerald-200">
                 <h4 className="font-bold text-emerald-800 mb-3"><span className="flex items-center gap-2"><Banknote size={16} /> Fiat → USDC (On-Ramp)</span></h4>
                 <ol className="space-y-2 text-sm text-emerald-700">
                   {gatewayInfo.treasury_integration.on_ramp_flow.map((step, i) => (
@@ -365,7 +365,7 @@ export default function TreasuryPage() {
                 </ol>
                 <div className="mt-4 flex gap-2">
                   <input type="number" value={depositAmt} onChange={e => setDepositAmt(e.target.value)}
-                    placeholder="USD amount" className="flex-1 px-3 py-2 rounded-lg border border-emerald-200 text-sm bg-white" />
+                    placeholder="USD amount" className="flex-1 px-3 py-2 rounded-lg border dark:border-slate-800 border-emerald-200 text-sm bg-white dark:bg-slate-900" />
                   <button onClick={handleDeposit} disabled={gwLoading}
                     className="px-4 py-2 bg-emerald-600 text-white rounded-lg font-bold text-sm hover:bg-emerald-700 disabled:opacity-50">
                     {gwLoading ? '...' : 'Deposit'}
@@ -373,7 +373,7 @@ export default function TreasuryPage() {
                 </div>
               </div>
               {/* Off-ramp Flow */}
-              <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-200">
+              <div className="bg-blue-50/50 rounded-xl p-4 border dark:border-slate-800 border-blue-200">
                 <h4 className="font-bold text-blue-800 mb-3"><span className="flex items-center gap-2"><Landmark size={16} /> USDC → Fiat (Off-Ramp)</span></h4>
                 <ol className="space-y-2 text-sm text-blue-700">
                   {gatewayInfo.treasury_integration.off_ramp_flow.map((step, i) => (
@@ -382,7 +382,7 @@ export default function TreasuryPage() {
                 </ol>
                 <div className="mt-4 flex gap-2">
                   <input type="number" value={withdrawAmt} onChange={e => setWithdrawAmt(e.target.value)}
-                    placeholder="USDC amount" className="flex-1 px-3 py-2 rounded-lg border border-blue-200 text-sm bg-white" />
+                    placeholder="USDC amount" className="flex-1 px-3 py-2 rounded-lg border dark:border-slate-800 border-blue-200 text-sm bg-white dark:bg-slate-900" />
                   <button onClick={handleWithdraw} disabled={gwLoading}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold text-sm hover:bg-blue-700 disabled:opacity-50">
                     {gwLoading ? '...' : 'Withdraw'}
@@ -393,11 +393,11 @@ export default function TreasuryPage() {
           </div>
 
           {/* Payment Rails */}
-          <div className="bg-white/60 backdrop-blur rounded-2xl p-5 border border-white shadow-sm">
+          <div className="bg-white dark:bg-slate-900/60 backdrop-blur rounded-2xl p-5 border dark:border-slate-800 border-white shadow-sm">
             <h3 className="font-extrabold text-slate-900 mb-4"><span className="flex items-center gap-2"><Radio size={20} /> Supported Payment Rails</span></h3>
             <div className="grid grid-cols-3 gap-4">
               {Object.entries(gatewayInfo.payment_rails).map(([key, rail]) => (
-                <div key={key} className="bg-gradient-to-br from-slate-50 to-white rounded-xl p-4 border border-slate-100">
+                <div key={key} className="bg-gradient-to-br from-slate-50 to-white rounded-xl p-4 border dark:border-slate-800 border-slate-100">
                   <h4 className="font-bold text-slate-800">{rail.name}</h4>
                   <div className="mt-2 space-y-1 text-xs text-slate-500">
                     <div>Currencies: <strong>{rail.currencies.join(', ')}</strong></div>
@@ -412,7 +412,7 @@ export default function TreasuryPage() {
 
           {/* Gateway Transactions */}
           {gatewayTxns.length > 0 && (
-            <div className="bg-white/60 backdrop-blur rounded-2xl p-5 border border-white shadow-sm">
+            <div className="bg-white dark:bg-slate-900/60 backdrop-blur rounded-2xl p-5 border dark:border-slate-800 border-white shadow-sm">
               <h3 className="font-extrabold text-slate-900 mb-4"><span className="flex items-center gap-2"><ClipboardList size={20} /> Gateway Transactions</span></h3>
               <table className="w-full text-sm">
                 <thead>
@@ -455,7 +455,7 @@ export default function TreasuryPage() {
       {tab === 'bridge' && domains && (
         <>
           {/* CCTP Domain Map */}
-          <div className="bg-white/60 backdrop-blur rounded-2xl p-5 border border-white shadow-sm">
+          <div className="bg-white dark:bg-slate-900/60 backdrop-blur rounded-2xl p-5 border dark:border-slate-800 border-white shadow-sm">
             <h3 className="font-extrabold text-slate-900 mb-4"><span className="flex items-center gap-2"><Globe size={20} /> CCTP Domain Registry</span></h3>
             <p className="text-sm text-slate-500 mb-4">
               Circle's Cross-Chain Transfer Protocol V2 enables native USDC transfers across blockchains
@@ -463,7 +463,7 @@ export default function TreasuryPage() {
             </p>
             <div className="grid grid-cols-7 gap-3">
               {Object.entries(domains).map(([chain, info]) => (
-                <div key={chain} className={`rounded-xl p-3 border text-center transition-all ${chain === 'arc' ? 'bg-purple-50 border-purple-300 ring-2 ring-purple-200' : 'bg-slate-50 border-slate-200'}`}>
+                <div key={chain} className={`rounded-xl p-3 border dark:border-slate-800 text-center transition-all ${chain === 'arc' ? 'bg-purple-50 border-purple-300 ring-2 ring-purple-200' : 'bg-slate-50 border-slate-200'}`}>
                   
                  <div className="flex justify-center mb-2">
                     {chain === 'arc' ? <Hexagon size={24} className="text-purple-600" /> : 
@@ -483,13 +483,13 @@ export default function TreasuryPage() {
           </div>
 
           {/* Route Planner */}
-          <div className="bg-white/60 backdrop-blur rounded-2xl p-5 border border-white shadow-sm">
+          <div className="bg-white dark:bg-slate-900/60 backdrop-blur rounded-2xl p-5 border dark:border-slate-800 border-white shadow-sm">
             <h3 className="font-extrabold text-slate-900 mb-4"><span className="flex items-center gap-2"><Shuffle size={20} /> Bridge Route Planner</span></h3>
             <div className="flex gap-3 items-end">
               <div>
                 <label className="text-xs font-bold text-slate-500 mb-1 block">Source</label>
                 <select value={bridgeSrc} onChange={e => setBridgeSrc(e.target.value)}
-                  className="px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium bg-white">
+                  className="px-3 py-2 rounded-xl border dark:border-slate-800 border-slate-200 text-sm font-medium bg-white dark:bg-slate-900">
                   {Object.keys(domains).map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
@@ -497,14 +497,14 @@ export default function TreasuryPage() {
               <div>
                 <label className="text-xs font-bold text-slate-500 mb-1 block">Destination</label>
                 <select value={bridgeDst} onChange={e => setBridgeDst(e.target.value)}
-                  className="px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium bg-white">
+                  className="px-3 py-2 rounded-xl border dark:border-slate-800 border-slate-200 text-sm font-medium bg-white dark:bg-slate-900">
                   {Object.keys(domains).map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div>
                 <label className="text-xs font-bold text-slate-500 mb-1 block">Amount USDC</label>
                 <input type="number" value={bridgeAmt} onChange={e => setBridgeAmt(e.target.value)}
-                  className="px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium w-32" />
+                  className="px-3 py-2 rounded-xl border dark:border-slate-800 border-slate-200 text-sm font-medium w-32" />
               </div>
               <button onClick={handlePlanRoute}
                 className="px-5 py-2 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-colors">
@@ -514,7 +514,7 @@ export default function TreasuryPage() {
 
             {/* Route Plan Result */}
             {bridgePlan && (
-              <div className="mt-5 bg-indigo-50/50 rounded-xl p-5 border border-indigo-200">
+              <div className="mt-5 bg-indigo-50/50 rounded-xl p-5 border dark:border-slate-800 border-indigo-200">
                 <div className="flex items-center justify-between mb-3">
                   <span className="font-bold text-indigo-800">
                     {bridgePlan.type === 'DIRECT' ? <span className="flex items-center gap-1.5"><Zap size={16} /> Direct Transfer</span> : <span className="flex items-center gap-1.5"><Waypoints size={16} /> CCTP Bridge Route</span>}
@@ -527,7 +527,7 @@ export default function TreasuryPage() {
                   {bridgePlan.steps.map((step, i) => (
                     <div key={i} className="flex items-center gap-2">
                       {i > 0 && <span className="text-indigo-300">→</span>}
-                      <div className={`rounded-xl px-4 py-3 text-center border ${step.action === 'BURN' ? 'bg-rose-50 border-rose-200' : step.action === 'ATTEST' ? 'bg-amber-50 border-amber-200' : step.action === 'MINT' ? 'bg-emerald-50 border-emerald-200' : 'bg-blue-50 border-blue-200'}`}>
+                      <div className={`rounded-xl px-4 py-3 text-center border dark:border-slate-800 ${step.action === 'BURN' ? 'bg-rose-50 border-rose-200' : step.action === 'ATTEST' ? 'bg-amber-50 border-amber-200' : step.action === 'MINT' ? 'bg-emerald-50 border-emerald-200' : 'bg-blue-50 border-blue-200'}`}>
                         <div className="font-bold text-xs">{step.action}</div>
                         <div className="text-xs text-slate-500 mt-1">{step.description}</div>
                       </div>
@@ -545,11 +545,11 @@ export default function TreasuryPage() {
           </div>
 
           {/* Supported Routes Table */}
-          <div className="bg-white/60 backdrop-blur rounded-2xl p-5 border border-white shadow-sm">
+          <div className="bg-white dark:bg-slate-900/60 backdrop-blur rounded-2xl p-5 border dark:border-slate-800 border-white shadow-sm">
             <h3 className="font-extrabold text-slate-900 mb-4"><span className="flex items-center gap-2"><Radio size={20} /> All CCTP Routes ({routes.length})</span></h3>
             <div className="max-h-72 overflow-y-auto">
               <table className="w-full text-sm">
-                <thead className="sticky top-0 bg-white">
+                <thead className="sticky top-0 bg-white dark:bg-slate-900">
                   <tr className="text-left text-xs text-slate-400 border-b border-slate-100">
                     <th className="pb-2 font-semibold">Source</th>
                     <th className="pb-2 font-semibold">→</th>
@@ -584,7 +584,7 @@ export default function TreasuryPage() {
 
 function StatCard({ label, value, icon, accent }: { label: string; value: string | number; icon: React.ReactNode; accent?: string }) {
   return (
-    <div className="bg-white/60 backdrop-blur rounded-2xl p-4 border border-white shadow-sm">
+    <div className="bg-white dark:bg-slate-900/60 backdrop-blur rounded-2xl p-4 border dark:border-slate-800 border-white shadow-sm">
       <div className="flex items-center justify-between mb-1">
         <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{label}</span>
         <span className="text-lg">{icon}</span>

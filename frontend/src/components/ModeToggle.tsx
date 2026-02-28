@@ -26,8 +26,8 @@ export default function ModeToggle() {
     <button
       onClick={toggle}
       disabled={loading}
-      className="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm font-medium
-                 hover:bg-gray-50 transition-colors disabled:opacity-50"
+      className="flex items-center gap-2 px-3 py-1.5 rounded-lg border dark:border-slate-800 text-sm font-medium
+                 hover:bg-gray-50 dark:bg-slate-800/50 transition-colors disabled:opacity-50"
       title="Click to cycle: mock → circle → arc"
     >
       <span className={`w-2 h-2 rounded-full ${mode === 'mock' ? 'bg-yellow-400' : 'bg-green-400'}`} />

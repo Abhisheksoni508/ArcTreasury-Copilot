@@ -62,21 +62,21 @@ export default function Dashboard() {
           <p className="text-slate-500 mt-1 font-medium">Overview of your treasury and payout operations.</p>
         </div>
         {health && (
-          <div className="flex items-center gap-3 bg-white/70 backdrop-blur-md px-4 py-2 rounded-2xl border border-white shadow-sm">
+          <div className="flex items-center gap-3 bg-white dark:bg-slate-900/70 backdrop-blur-md px-4 py-2 rounded-2xl border dark:border-slate-800 border-white shadow-sm">
             <span className="text-xs text-emerald-600 flex items-center gap-1.5 font-bold">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)] animate-pulse" />
               Backend {health.status} — {health.adapter_mode.toUpperCase()} mode
             </span>
             <span className="w-px h-5 bg-slate-200" />
             <span className={`text-xs px-3 py-1.5 rounded-xl font-bold shadow-sm ${health.circle_configured
-              ? 'bg-blue-50 text-blue-700 border border-blue-200'
-              : 'bg-slate-100 text-slate-500 border border-slate-200'
+              ? 'bg-blue-50 text-blue-700 border dark:border-slate-800 border-blue-200'
+              : 'bg-slate-100 text-slate-500 border dark:border-slate-800 border-slate-200'
               }`}>
               Circle {health.circle_configured ? (health.circle_sandbox ? 'Sandbox' : 'Live') : 'Not Configured'}
             </span>
             <span className={`text-xs px-3 py-1.5 rounded-xl font-bold shadow-sm ${health.arc_configured
-              ? 'bg-purple-50 text-purple-700 border border-purple-200'
-              : 'bg-slate-100 text-slate-500 border border-slate-200'
+              ? 'bg-purple-50 text-purple-700 border dark:border-slate-800 border-purple-200'
+              : 'bg-slate-100 text-slate-500 border dark:border-slate-800 border-slate-200'
               }`}>
               Arc {health.arc_configured ? 'Ready' : 'Not Configured'}
             </span>
@@ -85,7 +85,7 @@ export default function Dashboard() {
       </div>
 
       {error && (
-        <div className="bg-rose-50/80 backdrop-blur-sm border border-rose-200 text-rose-700 px-5 py-4 rounded-2xl shadow-sm flex items-center gap-3">
+        <div className="bg-rose-50/80 backdrop-blur-sm border dark:border-slate-800 border-rose-200 text-rose-700 px-5 py-4 rounded-2xl shadow-sm flex items-center gap-3">
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
           <span className="font-semibold">{error}</span>
         </div>
@@ -101,10 +101,10 @@ export default function Dashboard() {
       </div>
 
       {/* Main Treasury Card - Updated to match image gradient */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-cyan-500 via-blue-600 to-purple-600 rounded-3xl shadow-xl shadow-blue-900/10 border border-white/20 p-8">
+      <div className="relative overflow-hidden bg-gradient-to-br from-cyan-500 via-blue-600 to-purple-600 rounded-3xl shadow-xl shadow-blue-900/10 border dark:border-slate-800 border-white/20 p-8">
         {/* Subtle glass overlays */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full mix-blend-overlay filter blur-2xl transform translate-x-1/3 -translate-y-1/3"></div>
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-white opacity-10 rounded-full mix-blend-overlay filter blur-2xl transform -translate-x-1/3 translate-y-1/3"></div>
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white dark:bg-slate-900 opacity-10 rounded-full mix-blend-overlay filter blur-2xl transform translate-x-1/3 -translate-y-1/3"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-white dark:bg-slate-900 opacity-10 rounded-full mix-blend-overlay filter blur-2xl transform -translate-x-1/3 translate-y-1/3"></div>
 
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div>
@@ -127,20 +127,20 @@ export default function Dashboard() {
             )}
 
             {walletBalance?.wallet_id && (
-              <div className="mt-5 flex items-center gap-3 text-sm text-blue-50 font-mono bg-black/20 backdrop-blur-md px-4 py-2 rounded-xl w-fit border border-white/10 shadow-inner">
+              <div className="mt-5 flex items-center gap-3 text-sm text-blue-50 font-mono bg-black/20 backdrop-blur-md px-4 py-2 rounded-xl w-fit border dark:border-slate-800 border-white/10 shadow-inner">
                 <span className="select-all opacity-90">{walletBalance.wallet_id}</span>
               </div>
             )}
 
             {balanceError && (
-              <div className="mt-5 flex items-center gap-2 bg-red-500/30 backdrop-blur-md text-white px-4 py-2 rounded-xl text-sm border border-red-400/30 font-medium tracking-wide">
+              <div className="mt-5 flex items-center gap-2 bg-red-500/30 backdrop-blur-md text-white px-4 py-2 rounded-xl text-sm border dark:border-slate-800 border-red-400/30 font-medium tracking-wide">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 {balanceError}
               </div>
             )}
           </div>
 
-          <div className="shrink-0 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-5 text-center min-w-[180px] shadow-lg">
+          <div className="shrink-0 bg-white dark:bg-slate-900/10 backdrop-blur-xl border dark:border-slate-800 border-white/20 rounded-2xl p-5 text-center min-w-[180px] shadow-lg">
             <div className="text-cyan-100 text-xs font-bold uppercase tracking-widest mb-1.5 opacity-90">Active Network</div>
             <div className="text-white font-extrabold text-xl tracking-tight drop-shadow-sm">
               {health?.adapter_mode === 'arc' ? 'Arc L1' : health?.adapter_mode === 'circle' ? 'Circle API' : 'Mock Network'}
@@ -152,22 +152,22 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
         {/* Recent Batches */}
         <div className="glass-panel rounded-3xl overflow-hidden flex flex-col">
-          <div className="px-7 py-6 border-b border-slate-200/50 flex items-center justify-between bg-white/50">
+          <div className="px-7 py-6 border-b border-slate-200/50 flex items-center justify-between bg-white dark:bg-slate-900/50">
             <h3 className="font-extrabold text-slate-900 text-xl flex items-center gap-2.5">
               <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
               Recent Batches
             </h3>
             <button
               onClick={() => nav('/batches')}
-              className="text-sm font-bold text-blue-700 hover:text-blue-800 bg-blue-50 border border-blue-100 hover:bg-blue-100 hover:border-blue-200 px-4 py-2 rounded-xl transition-all shadow-sm"
+              className="text-sm font-bold text-blue-700 hover:text-blue-800 bg-blue-50 border dark:border-slate-800 border-blue-100 hover:bg-blue-100 hover:border-blue-200 px-4 py-2 rounded-xl transition-all shadow-sm"
             >
               View All &rarr;
             </button>
           </div>
-          <div className="flex-1 overflow-x-auto bg-white/30">
+          <div className="flex-1 overflow-x-auto bg-white dark:bg-slate-900/30">
             {batches.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-                <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-4 shadow-inner border border-white">
+                <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-4 shadow-inner border dark:border-slate-800 border-white">
                   <svg className="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg>
                 </div>
                 <h4 className="text-slate-800 font-bold pb-1 text-lg">No batches found</h4>
@@ -205,21 +205,21 @@ export default function Dashboard() {
 
         {/* Recent Executions */}
         <div className="glass-panel rounded-3xl overflow-hidden flex flex-col">
-          <div className="px-7 py-6 border-b border-slate-200/50 flex items-center justify-between bg-white/50">
+          <div className="px-7 py-6 border-b border-slate-200/50 flex items-center justify-between bg-white dark:bg-slate-900/50">
             <h3 className="font-extrabold text-slate-900 text-xl flex items-center gap-2.5">
               <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
               Recent Executions
             </h3>
             {executions.length > 0 && (
-              <span className="text-xs font-bold text-slate-500 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm">
+              <span className="text-xs font-bold text-slate-500 bg-white dark:bg-slate-900 px-3 py-1.5 rounded-xl border dark:border-slate-800 border-slate-200 shadow-sm">
                 Latest {Math.min(executions.length, 5)}
               </span>
             )}
           </div>
-          <div className="flex-1 overflow-x-auto bg-white/30">
+          <div className="flex-1 overflow-x-auto bg-white dark:bg-slate-900/30">
             {executions.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-                <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-4 shadow-inner border border-white">
+                <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-4 shadow-inner border dark:border-slate-800 border-white">
                   <svg className="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 </div>
                 <h4 className="text-slate-800 font-bold pb-1 text-lg">No execution history</h4>
@@ -259,10 +259,10 @@ export default function Dashboard() {
 
 function StatCard({ label, value, color, bg, icon }: { label: string; value: string | number; color?: string; bg?: string; icon?: React.ReactNode }) {
   return (
-    <div className={`glass-panel rounded-3xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-cyan-900/10 group ${bg || 'bg-white/80 border-slate-100'}`}>
+    <div className={`glass-panel rounded-3xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-cyan-900/10 group ${bg || 'bg-white dark:bg-slate-900/80 border-slate-100'}`}>
       <div className="flex items-center justify-between mb-4">
         <div className="text-xs text-slate-500 font-bold uppercase tracking-widest">{label}</div>
-        {icon && <div className="p-2 bg-slate-50 rounded-2xl shadow-inner border border-white group-hover:scale-110 transition-transform">{icon}</div>}
+        {icon && <div className="p-2 bg-slate-50 rounded-2xl shadow-inner border dark:border-slate-800 border-white group-hover:scale-110 transition-transform">{icon}</div>}
       </div>
       <div className={`text-4xl font-black tracking-tight ${color || 'text-slate-900'}`}>{value}</div>
     </div>

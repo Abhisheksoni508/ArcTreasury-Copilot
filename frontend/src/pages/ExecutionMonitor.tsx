@@ -51,14 +51,14 @@ export default function ExecutionMonitor() {
       </div>
 
       {items.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm border px-5 py-16 text-center text-gray-400">
+        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border dark:border-slate-800 px-5 py-16 text-center text-gray-400">
           <p className="text-lg">No executions yet</p>
           <p className="text-sm mt-1">Execute a batch to see payout results here</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border dark:border-slate-800 overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
+            <thead className="bg-gray-50 dark:bg-slate-800/50 text-gray-500 text-xs uppercase">
               <tr>
                 <th className="px-4 py-3 text-left">Recipient</th>
                 <th className="px-4 py-3 text-right">Amount</th>
@@ -74,7 +74,7 @@ export default function ExecutionMonitor() {
                 <>
                   <tr
                     key={item.id}
-                    className="hover:bg-gray-50 cursor-pointer"
+                    className="hover:bg-gray-50 dark:bg-slate-800/50 cursor-pointer"
                     onClick={() => handleExpand(item.id)}
                   >
                     <td className="px-4 py-3">
@@ -84,7 +84,7 @@ export default function ExecutionMonitor() {
                     <td className="px-4 py-3 text-right font-mono">${item.amount.toLocaleString()}</td>
                     <td className="px-4 py-3"><ChainBadge chain={item.destination_chain} /></td>
                     <td className="px-4 py-3"><StatusBadge value={item.execution_status} type="execution" /></td>
-                    <td className="px-4 py-3 text-gray-600">{item.adapter_used || '—'}</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{item.adapter_used || '—'}</td>
                     <td className="px-4 py-3"><SimulatedLabel isSimulated={item.is_simulated} /></td>
                     <td className="px-4 py-3">
                       {item.execution_status === 'FAILED' && (
@@ -100,7 +100,7 @@ export default function ExecutionMonitor() {
                   </tr>
                   {expandedItem === item.id && (
                     <tr key={`${item.id}-legs`}>
-                      <td colSpan={7} className="bg-gray-50 px-6 py-4">
+                      <td colSpan={7} className="bg-gray-50 dark:bg-slate-800/50 px-6 py-4">
                         <h4 className="font-semibold text-xs uppercase text-gray-500 mb-2">Payout Legs</h4>
                         {legs.length === 0 ? (
                           <span className="text-gray-400 text-sm">No legs recorded</span>

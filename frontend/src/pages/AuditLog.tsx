@@ -21,7 +21,7 @@ export default function AuditLog() {
           <select
             value={filter}
             onChange={e => setFilter(e.target.value)}
-            className="border rounded-lg px-3 py-1.5 text-sm"
+            className="border dark:border-slate-800 rounded-lg px-3 py-1.5 text-sm"
           >
             <option value="">All events</option>
             <option value="batch">Batches</option>
@@ -35,14 +35,14 @@ export default function AuditLog() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm border px-5 py-16 text-center text-gray-400">
+        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border dark:border-slate-800 px-5 py-16 text-center text-gray-400">
           <p className="text-lg">No audit events yet</p>
           <p className="text-sm mt-1">Events are recorded for every state transition</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border dark:border-slate-800 overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
+            <thead className="bg-gray-50 dark:bg-slate-800/50 text-gray-500 text-xs uppercase">
               <tr>
                 <th className="px-4 py-3 text-left">Timestamp</th>
                 <th className="px-4 py-3 text-left">Entity</th>
@@ -53,7 +53,7 @@ export default function AuditLog() {
             </thead>
             <tbody className="divide-y">
               {filtered.map(log => (
-                <tr key={log.id} className="hover:bg-gray-50 text-xs">
+                <tr key={log.id} className="hover:bg-gray-50 dark:bg-slate-800/50 text-xs">
                   <td className="px-4 py-2.5 text-gray-500 whitespace-nowrap">
                     {new Date(log.timestamp).toLocaleString()}
                   </td>
@@ -62,7 +62,7 @@ export default function AuditLog() {
                     <span className="text-gray-400 ml-1 font-mono">{log.entity_id}</span>
                   </td>
                   <td className="px-4 py-2.5">
-                    <span className="inline-flex px-2 py-0.5 rounded bg-gray-100 text-gray-700 font-mono text-xs">
+                    <span className="inline-flex px-2 py-0.5 rounded bg-gray-100 text-gray-700 dark:text-gray-300 font-mono text-xs">
                       {log.action}
                     </span>
                   </td>

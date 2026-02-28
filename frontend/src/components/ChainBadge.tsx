@@ -9,7 +9,7 @@ const CHAIN_COLORS: Record<string, string> = {
 };
 
 export default function ChainBadge({ chain }: { chain: string }) {
-  const color = CHAIN_COLORS[chain.toLowerCase()] || 'bg-gray-100 text-gray-700';
+  const color = CHAIN_COLORS[chain.toLowerCase()] || 'bg-gray-100 text-gray-700 dark:text-gray-300';
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${color}`}>
       {chain}

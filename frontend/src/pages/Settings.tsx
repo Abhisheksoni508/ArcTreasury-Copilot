@@ -69,7 +69,7 @@ export default function Settings() {
     <div className="space-y-6 max-w-2xl">
       <h2 className="text-2xl font-bold">Settings</h2>
 
-      <div className="bg-white rounded-xl shadow-sm border p-6 space-y-4">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border dark:border-slate-800 p-6 space-y-4">
         <h3 className="font-semibold text-lg">Adapter Mode</h3>
         <p className="text-sm text-gray-500">
           Controls whether payouts are executed through the mock adapter (simulated),
@@ -84,7 +84,7 @@ export default function Settings() {
               className={`flex-1 px-4 py-3 rounded-lg border-2 text-sm font-medium transition-colors text-left
                 ${settings.adapter_mode === mode
                   ? 'border-blue-500 bg-blue-50 text-blue-800'
-                  : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'}`}
+                  : 'border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-gray-600 dark:text-gray-400 hover:border-gray-300'}`}
             >
               <div className="flex items-center gap-2">
                 <span className={`w-3 h-3 rounded-full ${info.color}`} />
@@ -94,13 +94,13 @@ export default function Settings() {
             </button>
           ))}
         </div>
-        <div className="bg-gray-50 rounded-lg p-3 text-xs text-gray-600">
+        <div className="bg-gray-50 dark:bg-slate-800/50 rounded-lg p-3 text-xs text-gray-600 dark:text-gray-400">
           <span className="font-semibold">{activeDetail.label}: </span>
           {activeDetail.detail}
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border p-6 space-y-4">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border dark:border-slate-800 p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-lg">Treasury Wallet Setup</h3>
           <button
@@ -116,10 +116,10 @@ export default function Settings() {
           in the running backend process so real payouts can execute immediately.
         </p>
         {setupError && (
-          <div className="text-xs bg-red-50 border border-red-200 text-red-700 rounded p-3">{setupError}</div>
+          <div className="text-xs bg-red-50 border dark:border-slate-800 border-red-200 text-red-700 rounded p-3">{setupError}</div>
         )}
         {setupResult && (
-          <div className="text-xs bg-green-50 border border-green-200 text-green-700 rounded p-3 space-y-1">
+          <div className="text-xs bg-green-50 border dark:border-slate-800 border-green-200 text-green-700 rounded p-3 space-y-1">
             <p><strong>Wallet ID:</strong> <code>{setupResult.wallet_id}</code></p>
             <p><strong>Address:</strong> <code>{setupResult.address}</code></p>
             <p><strong>Chain:</strong> {setupResult.blockchain}</p>
@@ -128,7 +128,7 @@ export default function Settings() {
         )}
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border p-6 space-y-3">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border dark:border-slate-800 p-6 space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-lg">Circle Gateway + Circle Wallets</h3>
           <span className={`text-xs px-2 py-1 rounded-full font-medium ${
@@ -166,7 +166,7 @@ export default function Settings() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border p-6 space-y-3">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border dark:border-slate-800 p-6 space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-lg">Arc Bridge Kit (Circle L1)</h3>
           <span className="text-xs px-2 py-1 rounded-full font-medium bg-purple-100 text-purple-800">
@@ -194,7 +194,7 @@ export default function Settings() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border p-6 space-y-4">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border dark:border-slate-800 p-6 space-y-4">
         <h3 className="font-semibold text-lg">Policy Configuration</h3>
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
@@ -208,7 +208,7 @@ export default function Settings() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border p-6 space-y-4">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border dark:border-slate-800 p-6 space-y-4">
         <h3 className="font-semibold text-lg">System Info</h3>
         <div className="text-sm space-y-2">
           <div>
@@ -222,7 +222,7 @@ export default function Settings() {
         </div>
       </div>
 
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-5">
+      <div className="bg-amber-50 border dark:border-slate-800 border-amber-200 rounded-xl p-5">
         <h4 className="font-semibold text-amber-800 text-sm">About Real vs Simulated</h4>
         <ul className="mt-2 text-sm text-amber-700 space-y-1">
           <li><strong>SIMULATED</strong> — Mock adapter with deterministic demo outcomes. No real funds moved. Safe for demos.</li>
@@ -240,9 +240,9 @@ export default function Settings() {
 
 function ConfigRow({ label, value, warn }: { label: string; value: string; warn?: boolean }) {
   return (
-    <div className="bg-gray-50 rounded p-2">
+    <div className="bg-gray-50 dark:bg-slate-800/50 rounded p-2">
       <div className="text-xs text-gray-400 uppercase tracking-wide">{label}</div>
-      <div className={`text-xs font-mono mt-0.5 ${warn ? 'text-red-600' : 'text-gray-700'}`}>{value}</div>
+      <div className={`text-xs font-mono mt-0.5 ${warn ? 'text-red-600' : 'text-gray-700 dark:text-gray-300'}`}>{value}</div>
     </div>
   );
 }
