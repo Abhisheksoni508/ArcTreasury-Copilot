@@ -2,27 +2,36 @@
 
 **AI-powered USDC payouts, policy checks, and treasury automation on Arc.**
 
-Built for the Global Payouts and Treasury Systems bounty — Circle Gateway + Arc Bridge Kit.
+Built for the **Global Payouts and Treasury Systems** bounty — Circle Programmable Wallets + Arc Testnet.
 
 ## What It Does
 
 ArcTreasury Copilot is a full-stack treasury operations system that:
 
 1. **Ingests payout batches** — payroll, vendor payments, revenue splits
-2. **Runs a policy + risk engine** — classifies every payout as APPROVED / REVIEW / HELD / QUEUED / REJECTED based on amount limits, chain validation, recipient risk scoring, and velocity checks
-3. **Executes multi-recipient, multi-chain USDC payouts** — via adapter pattern supporting mock (simulated), Circle Gateway, and Arc Bridge Kit
-4. **Provides full audit trails** — every state transition logged with timestamps
-5. **Clearly labels REAL vs SIMULATED** — honest transparency throughout the UI
+2. **Runs a 5-rule policy + risk engine** — classifies every payout as APPROVED / REVIEW / HELD / QUEUED / REJECTED
+3. **Executes multi-recipient, multi-chain USDC payouts** — via adapter pattern supporting mock, Circle Programmable Wallets, and Arc
+4. **Autonomous Treasury Agent** — 3 strategies (conservative/balanced/aggressive) running continuous payout loops
+5. **One-click AutoPilot** — seed → policy → review → execute in a single button press
+6. **RWA-backed treasury** — allocate idle USDC to 4 tokenized asset classes (T-Bills, MMF, Corp Bonds, RE Fund)
+7. **CCTP V2 bridge routing** — 7 chains, 42 cross-chain routes with fee/time estimates
+8. **Circle Gateway** — fiat on/off ramp via Wire, ACH, SEPA rails
+9. **Full audit trails** — every state transition logged with timestamps
+10. **Clearly labels REAL vs SIMULATED** — honest transparency throughout the UI
 
 ## Architecture
 
 ```
-React + Vite + TypeScript + Tailwind
-        │ REST API (JSON)
-FastAPI (Python) + SQLite
-  ├── Policy Engine (rule-based risk scoring)
+React + Vite + TypeScript + Tailwind (7 pages)
+        │ REST API (43 endpoints)
+FastAPI (Python) + SQLite (9 tables, WAL mode)
+  ├── Policy Engine (5-rule risk scoring)
   ├── Execution Orchestrator (multi-chain payout legs)
-  └── Adapter Layer (mock / circle / arc)
+  ├── Adapter Layer (mock / circle / arc)
+  ├── Treasury Agent (3 strategies, autonomous loop)
+  ├── RWA Treasury (4 asset classes, health scoring, auto-rebalance)
+  ├── CCTP Bridge Router (7 chains, 42 routes)
+  └── Circle Gateway (fiat on/off ramp, 3 payment rails)
 ```
 
 ## Quick Start
@@ -43,31 +52,33 @@ npm run dev
 ```
 Open: http://localhost:5173
 
-### Demo Flow (90 seconds)
-1. Open Dashboard → empty state
-2. Go to Batches → click **Seed Demo Data** → 6 payout items loaded
-3. Click **Run Policy Engine** → items classified into all 5 decision states
-4. Go to Review Queue → **Approve** the review item
-5. Back to Batches → click **Execute Batch** → watch results
-6. Go to Execution Monitor → **Retry** failed items → see retry succeed
-7. Open Audit Log → full history of every state change
-8. Settings → toggle between mock/circle/arc adapter modes
+### Demo Flow (2 minutes)
+1. Open **Dashboard** → system overview
+2. Go to **Batches** → click **AutoPilot** → watch one-click: seed 6 items → policy → auto-review → execute
+3. Open **Copilot Agent** → start with "balanced" strategy → watch autonomous loop
+4. Go to **Treasury & RWA** → Tab 1: seed RWA positions, allocate USDC to tokenized assets, view health score
+5. **Treasury & RWA** → Tab 2: Circle Gateway — create deposit/withdrawal intents
+6. **Treasury & RWA** → Tab 3: CCTP Bridge — plan cross-chain route with fee breakdown
+7. **Execution Monitor** → retry failed items, inspect payout legs
+8. **Audit Log** → full history of every action
+9. **Settings** → toggle mock/circle/arc adapter mode
 
 ## Bounty Criteria Mapping
 
 | Criteria | Implementation |
 |---|---|
-| Automated/agent-driven payout logic | Policy engine with rule-based risk scoring + automated execution orchestrator |
-| Multi-recipient, multi-chain settlement | 6 recipients across Ethereum, Polygon, Arbitrum, Solana with payout legs model |
-| Policy-based or condition-based payouts | 5-rule policy chain: amount limits, chain validation, recipient risk, velocity, duplicates |
-| Circle Gateway | CircleAdapter with real API integration (falls back to mock) |
-| Arc Bridge Kit | ArcAdapter with real API integration (falls back to mock) |
-| Circle Wallets | Treasury wallet model with USDC settlement |
+| Policy-based payouts | 5-rule engine: amount limits, chain validation, recipient risk, velocity, duplicates → 5 decision states |
+| Agent-driven automation | Treasury Copilot Agent with 3 strategies + one-click AutoPilot |
+| Multi-recipient, multi-chain | 6+ recipients across ETH/Polygon/Arbitrum/Solana/Avalanche/Base/Arc with payout legs |
+| RWA-backed treasury | 4 tokenized assets (T-Bills, MMF, Corp Bonds, RE Fund), health scoring, auto-rebalance |
+| Circle Gateway | Fiat on/off ramp: Wire/ACH/SEPA, deposit + withdrawal intents, fee breakdown |
+| CCTP Bridge | V2 domain registry (7 chains, 42 routes), route planner with burn→attest→mint steps |
+| Circle Wallets | Real USDC transfers on ARC-TESTNET via Circle Programmable Wallets |
 
 ## Real vs Simulated
 
+- **REAL** (green badge): Circle Programmable Wallets API with actual USDC transfers on-chain. Proven with 4 transfers on ARC-TESTNET.
 - **SIMULATED** (yellow badge): Mock adapter with deterministic demo outcomes. No real funds moved.
-- **REAL** (green badge): Circle or Arc API with actual USDC transfers on-chain.
 
 The system defaults to mock mode for safe demo. Toggle to circle/arc mode in Settings when API keys are configured.
 
@@ -81,38 +92,35 @@ The system defaults to mock mode for safe demo. Toggle to circle/arc mode in Set
 | HELD | 75-89 | Significant risk flags, held pending investigation |
 | REJECTED | 90-100 | Blocked — blocklist match or critical policy violation |
 
-## API Endpoints
+## API Endpoints (43 total)
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/health` | Health check |
-| GET/PUT | `/api/settings` | View/update settings |
-| POST | `/api/seed` | Seed demo data |
-| POST | `/api/batches` | Create batch |
-| GET | `/api/batches` | List batches |
-| GET | `/api/batches/{id}` | Get batch detail |
-| POST | `/api/batches/{id}/policy` | Run policy engine |
-| GET | `/api/review-queue` | Items needing review |
-| POST | `/api/items/{id}/decide` | Manual approve/reject |
-| POST | `/api/batches/{id}/execute` | Execute batch |
-| POST | `/api/items/{id}/retry` | Retry failed item |
-| GET | `/api/executions` | List executed items |
-| GET | `/api/items/{id}/legs` | Get payout legs |
-| GET | `/api/audit-logs` | Audit trail |
+| Category | Endpoints |
+|---|---|
+| **Health & Settings** | `GET /api/health`, `GET/PUT /api/settings` |
+| **Batches** | `POST /api/seed`, `POST /api/batches`, `GET /api/batches`, `GET /api/batches/{id}` |
+| **Policy & Review** | `POST /api/batches/{id}/policy`, `GET /api/review-queue`, `POST /api/items/{id}/decide` |
+| **Execution** | `POST /api/batches/{id}/execute`, `POST /api/items/{id}/retry`, `GET /api/executions`, `GET /api/items/{id}/legs` |
+| **Agent** | `GET /api/agent/status`, `POST /api/agent/control`, `PUT /api/agent/strategy`, `GET /api/agent/activity`, `GET /api/agent/strategies` |
+| **Treasury (RWA)** | `GET /api/treasury/overview`, `GET /api/treasury/catalog`, `POST /api/treasury/allocate`, `POST /api/treasury/redeem/{id}`, `POST /api/treasury/rebalance`, `POST /api/treasury/seed` |
+| **CCTP Bridge** | `GET /api/bridge/domains`, `GET /api/bridge/routes`, `POST /api/bridge/plan`, `GET /api/bridge/transactions` |
+| **Circle Gateway** | `GET /api/gateway/info`, `POST /api/gateway/deposit`, `POST /api/gateway/withdraw`, `GET /api/gateway/transactions` |
+| **Wallets** | `POST /api/wallets/setup`, `GET /api/wallets/balance` |
+| **Audit** | `GET /api/audit-logs` |
 
 ## Tech Stack
 
-- **Frontend**: React 18 + Vite 6 + TypeScript + Tailwind CSS
-- **Backend**: FastAPI (Python) + SQLite (aiosqlite)
-- **Adapters**: Mock (deterministic) / Circle / Arc
+- **Frontend**: React 18 + Vite 6 + TypeScript + Tailwind CSS + lucide-react
+- **Backend**: FastAPI (Python 3.12) + SQLite (aiosqlite, WAL mode)
+- **Adapters**: Mock (deterministic) / Circle Programmable Wallets / Arc
+- **Circle SDK**: v10.1.0 for wallet creation scripts
 - **No auth required** — demo-first design
 
-## Environment Variables (optional)
+## Environment Variables
 
 ```
 ADAPTER_MODE=mock           # mock | circle | arc
-CIRCLE_API_KEY=             # Circle API key for real payouts
-ARC_API_KEY=                # Arc API key for real payouts
+CIRCLE_API_KEY=             # Circle API key (TEST_API_KEY: prefix for testnet)
+ARC_API_KEY=                # Arc API key
 POLICY_MAX_AMOUNT=25000     # Amount threshold for policy engine
 ```
 
@@ -121,20 +129,4 @@ POLICY_MAX_AMOUNT=25000     # Amount threshold for policy engine
 ```bash
 cd backend
 python -m pytest tests/ -v
-```
-
-## curl Quick Test
-
-```bash
-# Seed demo data
-curl -X POST http://localhost:8000/api/seed | python -m json.tool
-
-# Run policy engine
-curl -X POST http://localhost:8000/api/batches/batch-demo-001/policy | python -m json.tool
-
-# Execute batch
-curl -X POST http://localhost:8000/api/batches/batch-demo-001/execute | python -m json.tool
-
-# View audit logs
-curl http://localhost:8000/api/audit-logs | python -m json.tool
 ```

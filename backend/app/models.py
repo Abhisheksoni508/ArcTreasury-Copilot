@@ -1,57 +1,9 @@
-"""Pydantic models and enums for ArcTreasury Copilot."""
+"""Pydantic models for ArcTreasury Copilot."""
 
 from __future__ import annotations
-from enum import Enum
 from typing import Optional
 from pydantic import BaseModel, Field
 from datetime import datetime
-
-
-# ── Enums ──────────────────────────────────────────────────────────────
-
-class BatchStatus(str, Enum):
-    DRAFT = "DRAFT"
-    POLICY_RUN = "POLICY_RUN"
-    REVIEW = "REVIEW"
-    EXECUTING = "EXECUTING"
-    COMPLETED = "COMPLETED"
-    SETTLED = "SETTLED"
-
-
-class Decision(str, Enum):
-    PENDING = "PENDING"
-    APPROVED = "APPROVED"
-    REVIEW = "REVIEW"
-    HELD = "HELD"
-    QUEUED = "QUEUED"
-    REJECTED = "REJECTED"
-
-
-class ExecutionStatus(str, Enum):
-    PENDING = "PENDING"
-    PROCESSING = "PROCESSING"
-    SETTLED = "SETTLED"
-    FAILED = "FAILED"
-    RETRYING = "RETRYING"
-
-
-class LegStatus(str, Enum):
-    PENDING = "PENDING"
-    SUBMITTED = "SUBMITTED"
-    CONFIRMED = "CONFIRMED"
-    FAILED = "FAILED"
-
-
-class LegType(str, Enum):
-    DIRECT = "direct"
-    BRIDGE = "bridge"
-    TRANSFER = "transfer"
-
-
-class Category(str, Enum):
-    PAYROLL = "payroll"
-    VENDOR = "vendor"
-    REVENUE_SPLIT = "revenue_split"
 
 
 # ── Request/Response Models ────────────────────────────────────────────
