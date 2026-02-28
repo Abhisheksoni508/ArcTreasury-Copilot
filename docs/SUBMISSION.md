@@ -118,10 +118,10 @@ ArcTreasury Copilot is an AI-powered treasury operations platform that automates
    Treasury holds idle USDC and allocates it to 4 tokenized asset classes: T-Bills (5.25% APY), Money Market Fund (4.8%), Investment-Grade Corp Bonds (6.1%), Real Estate Fund (7.5%). Each has a risk rating and liquidity tier. The treasury health score is a composite of liquidity ratio, diversification index, and weighted yield. Auto-rebalance enforces a target 40% liquid reserve ratio.
 
 6. **What chains does CCTP support?**
-   7 chains with CCTP V2 domain IDs: Ethereum (0), Avalanche (1), Arbitrum (3), Base (6), Polygon (7), Solana (5), Arc (99). The route planner calculates burn→attest→mint steps with chain-specific fees and time estimates. Arc-native routes get reduced fees (0.01%).
+   7 chains with CCTP V2 domain IDs: Ethereum (0), Avalanche (1), Arbitrum (3), Base (6), Polygon (7), Solana (5), Arc (26). The route planner calculates burn→attest→mint steps with chain-specific fees and time estimates across 7 chains. Arc-native routes get reduced fees (0.01%).
 
 7. **How does Circle Gateway work?**
-   Fiat on/off ramp supporting Wire, ACH, and SEPA payment rails in USD, EUR, GBP, and SGD. The UI lets operators create deposit intents (fiat→USDC) and withdrawal intents (USDC→fiat) with fee breakdown. Each rail has specific constraints: Wire ($500 min, 0.1% fee), ACH ($10 min, 0.5% fee), SEPA (€100 min, 0.15% fee).
+   Fiat on/off ramp supporting Wire, ACH, and SEPA payment rails in USD, EUR, GBP, and SGD. Non-USD deposits are converted to USD via live FX rates (EUR×1.08, GBP×1.27, SGD×0.74) before minting USDC. The UI lets operators select a payment method and currency, see a live FX conversion preview, then create deposit intents (fiat→USD→USDC) or withdrawal intents (USDC→USD→fiat) with fee breakdown. Rail details: Wire ($100 min, 0.1% fee, 1-2 days), ACH ($10 min, free, 2-3 days), SEPA (€10 min, free, 1-2 days).
 
 8. **What chains are supported for payouts?**
    Ethereum, Polygon, Arbitrum, Solana, Avalanche, Base, and Arc Testnet. The payout legs model supports direct transfers (same chain) and bridged transfers (cross-chain via CCTP routing).
