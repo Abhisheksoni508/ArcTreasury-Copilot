@@ -178,7 +178,7 @@ export default function TreasuryPage() {
       {/* Tab Bar */}
       <div className="flex bg-slate-100 p-1 rounded-xl w-fit relative">
         <div
-          className="absolute top-1 bottom-1 w-[164px] bg-white rounded-lg shadow-sm transition-transform duration-300 ease-out"
+          className="absolute top-1 bottom-1 w-[164px] bg-white rounded-lg shadow-sm transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
           style={{ transform: `translateX(${tab === 'treasury' ? 0 : tab === 'gateway' ? 100 : 200}%)` }}
         />
         {(['treasury', 'gateway', 'bridge'] as const).map(t => (
