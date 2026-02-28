@@ -7,7 +7,7 @@ import {
   getAgentStrategies,
 } from '../api';
 import type { AgentStatus, AgentActivity, AgentStrategyInfo } from '../types';
-import { ClipboardCheck, CheckCircle2, Rocket, BarChart2, RefreshCw, XCircle, Bot, Zap, Play } from 'lucide-react';
+import { ClipboardCheck, CheckCircle2, Rocket, BarChart2, RefreshCw, XCircle, Bot, Zap, Play, Square } from 'lucide-react';
 
 const ACTION_ICONS: Record<string, React.ReactNode> = {
   AUTO_POLICY: <ClipboardCheck size={16} />,
@@ -169,9 +169,9 @@ export default function AgentPage() {
               <button
                 onClick={handleStop}
                 disabled={loading}
-                className="w-full px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 disabled:opacity-50 transition-colors"
+                className="w-full px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
               >
-                {loading ? 'Stopping...' : '⏹ Stop Agent'}
+                {loading ? 'Stopping...' : <><Square size={18} fill="currentColor" /> Stop Agent</>}
               </button>
             )}
             {isRunning && activeStrategyInfo && (
