@@ -279,7 +279,7 @@ export default function TreasuryPage() {
                           <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                         ))}
                       </Pie>
-                      <Tooltip formatter={(value: number) => usd(value)} cursor={{ fill: 'transparent' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                      <Tooltip formatter={(value: any) => usd(Number(value))} cursor={{ fill: 'transparent' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
                     </RechartsPieChart>
                   </ResponsiveContainer>
                 )}
@@ -358,7 +358,7 @@ export default function TreasuryPage() {
           {/* Category Breakdown */}
           {Object.keys(overview.category_breakdown).length > 0 && (
             <div className="bg-white/60 backdrop-blur rounded-2xl p-5 border border-white shadow-sm">
-              <h3 className="font-extrabold text-slate-900 mb-4"><span className="flex items-center gap-2"><PieChart size={20} /> Asset Allocation Breakdown</span></h3>
+              <h3 className="font-extrabold text-slate-900 mb-4"><span className="flex items-center gap-2"><PieChartIcon size={20} /> Asset Allocation Breakdown</span></h3>
               <div className="grid grid-cols-4 gap-4">
                 {Object.entries(overview.category_breakdown).map(([cat, data]) => (
                   <div key={cat} className="bg-gradient-to-br from-slate-50 to-white rounded-xl p-4 border border-slate-100">
