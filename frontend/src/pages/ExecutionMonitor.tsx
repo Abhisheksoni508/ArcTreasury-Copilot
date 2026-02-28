@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
 import { listExecutions, retryItem, getItemLegs } from '../api';
 import type { PayoutItem, PayoutLeg } from '../types';
 import StatusBadge from '../components/StatusBadge';
@@ -11,7 +12,7 @@ export default function ExecutionMonitor() {
   const [legs, setLegs] = useState<PayoutLeg[]>([]);
   const [loading, setLoading] = useState('');
 
-  const refresh = () => listExecutions().then(setItems).catch(() => {});
+  const refresh = () => listExecutions().then(setItems).catch(() => { });
   useEffect(() => { refresh(); }, []);
 
   const handleExpand = async (itemId: string) => {
@@ -91,9 +92,15 @@ export default function ExecutionMonitor() {
                         <button
                           onClick={e => { e.stopPropagation(); handleRetry(item.id); }}
                           disabled={loading === item.id}
-                          className="px-3 py-1 bg-amber-500 text-white rounded text-xs font-medium hover:bg-amber-600 disabled:opacity-50"
+                          className="w-[72px] h-[28px] flex items-center justify-center gap-1.5 bg-amber-500 text-white rounded text-xs font-medium hover:bg-amber-600 disabled:opacity-50 transition-colors"
                         >
-                          {loading === item.id ? 'Retrying...' : 'Retry'}
+                          {loading === item.id ? (
+                            <>
+                              <Loader2 size={12} className="animate-spin" /> Retry
+                            </>
+                          ) : (
+                            'Retry'
+                          )}
                         </button>
                       )}
                     </td>
