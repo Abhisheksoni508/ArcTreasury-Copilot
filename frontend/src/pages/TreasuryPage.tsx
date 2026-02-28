@@ -1,9 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
   Landmark, Coins, Building2, Home, ArrowRightLeft, Waypoints, Sprout, Scale,
-  Banknote, BarChart3, TrendingUp, Gem, PieChart, FileText, Radio, ClipboardList,
+  Banknote, BarChart3, TrendingUp, Gem, PieChart as PieChartIcon, FileText, Radio, ClipboardList,
   Globe, Hexagon, Diamond, Circle, Disc, Square, Triangle, Shuffle, Zap, ArrowDown, ArrowUp
 } from 'lucide-react';
+
+import { PieChart as RechartsPieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+
+const PIE_COLORS = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#14b8a6', '#f43f5e'];
 
 import {
   getTreasuryOverview, getRwaCatalog, allocateToRwa, redeemRwaPosition,
@@ -248,8 +252,42 @@ export default function TreasuryPage() {
           {/* Allocation Section */}
           <div className="grid grid-cols-2 gap-6">
             {/* RWA Positions */}
-            <div className="bg-white/60 backdrop-blur rounded-2xl p-5 border border-white shadow-sm">
+            <div className="bg-white/60 backdrop-blur rounded-2xl p-5 border border-white shadow-sm flex flex-col">
               <h3 className="font-extrabold text-slate-900 mb-4"><span className="flex items-center gap-2"><BarChart3 size={20} /> Active RWA Positions</span></h3>
+
+              <div className="h-48 mb-4 flex items-center justify-center shrink-0">
+                {overview.positions.length === 0 ? (
+                  <div className="text-slate-400 flex flex-col items-center">
+                    <PieChartIcon size={40} className="mb-2 opacity-20" />
+                    <span className="text-sm">Not enough data to graph</span>
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RechartsPieChart>
+                      <Pie
+                        data={overview.positions}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={50}
+                        outerRadius={80}
+                        paddingAngle={5}
+                        dataKey="current_value"
+                        nameKey="asset_name"
+                        stroke="none"
+                      >
+                        {overview.positions.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(value: number) => usd(value)} cursor={{ fill: 'transparent' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                    </RechartsPieChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+
+              {/* Thin Gray Line Divider */}
+              <hr className="border-t border-slate-200 mb-4 shrink-0" />
+
               {overview.positions.length === 0 ? (
                 <p className="text-slate-400 text-sm">No positions yet. Click "Seed RWA Demo" or allocate below.</p>
               ) : (
