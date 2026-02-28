@@ -7,7 +7,7 @@ import {
   getAgentStrategies,
 } from '../api';
 import type { AgentStatus, AgentActivity, AgentStrategyInfo } from '../types';
-import { ClipboardCheck, CheckCircle2, Rocket, BarChart2, RefreshCw, XCircle, Bot, Zap } from 'lucide-react';
+import { ClipboardCheck, CheckCircle2, Rocket, BarChart2, RefreshCw, XCircle, Bot, Zap, Play } from 'lucide-react';
 
 const ACTION_ICONS: Record<string, React.ReactNode> = {
   AUTO_POLICY: <ClipboardCheck size={16} />,
@@ -135,8 +135,8 @@ export default function AgentPage() {
                   onClick={() => setSelectedStrategy(name)}
                   disabled={isRunning}
                   className={`text-left px-4 py-3 rounded-lg border-2 text-sm transition-colors ${selectedStrategy === name
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 hover:border-gray-300'
                     } ${isRunning ? 'opacity-60 cursor-not-allowed' : ''}`}
                 >
                   <div className="flex items-center gap-2">
@@ -161,9 +161,9 @@ export default function AgentPage() {
               <button
                 onClick={handleStart}
                 disabled={loading}
-                className="w-full px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 disabled:opacity-50 transition-colors"
+                className="w-full px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
               >
-                {loading ? 'Starting...' : '▶ Start Agent'}
+                {loading ? 'Starting...' : <><Play size={18} fill="currentColor" /> Start Agent</>}
               </button>
             ) : (
               <button
