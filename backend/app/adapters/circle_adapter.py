@@ -54,6 +54,13 @@ CHAIN_MAP_PROD = {
 }
 
 
+# Known USDC token addresses per blockchain (used in createTransaction API)
+USDC_TOKEN_ADDRESS = {
+    "ARC-TESTNET": "0x3600000000000000000000000000000000000000",
+    # Add mainnet/other testnet token addresses as needed
+}
+
+
 class CircleAdapter:
     """
     Executes USDC payouts via Circle's W3S Developer-Controlled Wallets API.
@@ -61,17 +68,17 @@ class CircleAdapter:
     Each transfer call:
       1. Fetches Circle's RSA public key
       2. Encrypts the entity secret (RSA-OAEP / SHA-256) → entitySecretCiphertext
-      3. Looks up the USDC token ID for the target blockchain
-      4. POSTs to /v1/w3s/developer/transactions/transfer
+      3. POSTs to /v1/w3s/developer/transactions/transfer using walletAddress + tokenAddress
 
-    Requires CIRCLE_API_KEY, CIRCLE_WALLET_ID, and CIRCLE_ENTITY_SECRET in .env.
-    CIRCLE_WALLET_ID is the UUID shown in Circle console (not the 0x blockchain address).
+    Requires CIRCLE_API_KEY, CIRCLE_WALLET_ID, CIRCLE_ENTITY_SECRET, ARC_SOURCE_WALLET in .env.
     """
 
     def __init__(self):
         self.api_key = settings.CIRCLE_API_KEY
         self.wallet_id = settings.CIRCLE_WALLET_ID
+        self.wallet_address = settings.ARC_SOURCE_WALLET  # 0x address
         self.entity_secret = settings.CIRCLE_ENTITY_SECRET
+        self.blockchain = settings.ARC_CHAIN  # e.g. ARC-TESTNET
 
     @property
     def base_url(self) -> str:
@@ -119,27 +126,6 @@ class CircleAdapter:
         )
         return base64.b64encode(ciphertext).decode()
 
-    async def _get_usdc_token_id(self, blockchain: str) -> str | None:
-        """
-        Look up the USDC token ID for a given blockchain via Circle's tokens API.
-
-        GET /v1/w3s/tokens?blockchain={blockchain}
-        Returns the token UUID needed for the transfer payload.
-        """
-        async with httpx.AsyncClient() as client:
-            resp = await client.get(
-                f"{self.base_url}/tokens",
-                headers=self._headers(),
-                params={"blockchain": blockchain},
-                timeout=15.0,
-            )
-            if resp.status_code == 200:
-                tokens = resp.json().get("data", {}).get("tokens", [])
-                for token in tokens:
-                    if token.get("symbol", "").upper() in ("USDC", "USD"):
-                        return token.get("id")
-        return None
-
     async def execute(self, leg_id: str, recipient_address: str, amount: float,
                       destination_chain: str) -> LegResult:
         if not self.api_key:
@@ -153,13 +139,12 @@ class CircleAdapter:
                 is_simulated=True,
             )
 
-        if not self.wallet_id:
+        if not self.wallet_address:
             return LegResult(
                 status="FAILED",
                 error_message=(
-                    "Circle wallet ID not configured. "
-                    "Set CIRCLE_WALLET_ID in .env with the UUID from Circle console "
-                    "(Programmable Wallets → your wallet → copy the ID, not the 0x address)."
+                    "Wallet address not configured. "
+                    "Set ARC_SOURCE_WALLET in .env (run scripts/create-wallet.ts first)."
                 ),
                 is_simulated=False,
             )
@@ -174,30 +159,28 @@ class CircleAdapter:
                 is_simulated=False,
             )
 
-        chain_map = CHAIN_MAP_SANDBOX if settings.CIRCLE_SANDBOX else CHAIN_MAP_PROD
-        blockchain = chain_map.get(destination_chain.lower(), "ETH-SEPOLIA")
+        # All transfers go through ARC-TESTNET (our wallet's blockchain)
+        blockchain = self.blockchain
+        token_address = USDC_TOKEN_ADDRESS.get(blockchain)
+        if not token_address:
+            return LegResult(
+                status="FAILED",
+                error_message=f"No USDC token address configured for chain '{blockchain}'.",
+                is_simulated=False,
+            )
 
         try:
             entity_secret_ciphertext = await self._get_entity_secret_ciphertext()
 
-            token_id = await self._get_usdc_token_id(blockchain)
-            if not token_id:
-                return LegResult(
-                    status="FAILED",
-                    error_message=(
-                        f"No USDC token found for chain '{blockchain}'. "
-                        f"Verify Circle sandbox supports this chain."
-                    ),
-                    is_simulated=False,
-                )
-
+            # New Circle API: uses walletAddress + tokenAddress + blockchain
             payload = {
                 "idempotencyKey": str(uuid.uuid4()),
                 "entitySecretCiphertext": entity_secret_ciphertext,
-                "walletId": self.wallet_id,
+                "blockchain": blockchain,
+                "walletAddress": self.wallet_address,
                 "amounts": [f"{amount:.2f}"],
                 "destinationAddress": recipient_address,
-                "tokenId": token_id,
+                "tokenAddress": token_address,
                 "feeLevel": "MEDIUM",
             }
 
