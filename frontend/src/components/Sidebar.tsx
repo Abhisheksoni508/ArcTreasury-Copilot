@@ -1,14 +1,15 @@
 import { NavLink } from 'react-router-dom';
+import { LayoutDashboard, Package, Search, Zap, Bot, ClipboardList, Settings as SettingsIcon } from 'lucide-react';
 import AnimatedLogo from './AnimatedLogo';
 
 const NAV = [
-  { to: '/', label: 'Dashboard', icon: '📊' },
-  { to: '/batches', label: 'Batches', icon: '📦' },
-  { to: '/review', label: 'Review Queue', icon: '🔍' },
-  { to: '/execution', label: 'Execution', icon: '⚡' },
-  { to: '/agent', label: 'Copilot Agent', icon: '🤖' },
-  { to: '/audit', label: 'Audit Log', icon: '📋' },
-  { to: '/settings', label: 'Settings', icon: '⚙️' },
+  { to: '/', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
+  { to: '/batches', label: 'Batches', icon: <Package size={18} /> },
+  { to: '/review', label: 'Review Queue', icon: <Search size={18} /> },
+  { to: '/execution', label: 'Execution', icon: <Zap size={18} /> },
+  { to: '/agent', label: 'Copilot Agent', icon: <Bot size={18} /> },
+  { to: '/audit', label: 'Audit Log', icon: <ClipboardList size={18} /> },
+  { to: '/settings', label: 'Settings', icon: <SettingsIcon size={18} /> },
 ];
 
 export default function Sidebar() {
