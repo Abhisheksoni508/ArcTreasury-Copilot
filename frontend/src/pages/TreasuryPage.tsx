@@ -174,8 +174,8 @@ export default function TreasuryPage() {
     <div className="space-y-6 animate-in fade-in duration-700 pb-12 relative">
       {/* Top Banner Notification */}
       {notification && (
-        <div className="fixed top-0 left-0 w-full z-50 flex justify-center animate-in slide-in-from-top-4 fade-in duration-300">
-          <div className={`mt-4 px-6 py-3 rounded-2xl shadow-2xl backdrop-blur-md border border-white/20 flex items-center gap-3 font-bold text-sm text-white ${notification.type === 'error' ? 'bg-rose-500/90 shadow-rose-500/20' : 'bg-emerald-500/90 shadow-emerald-500/20'}`}>
+        <div className="fixed top-4 left-0 w-full z-[99999] flex justify-center animate-in slide-in-from-top-4 fade-in duration-300 pointer-events-none">
+          <div className={`px-6 py-3 rounded-2xl shadow-2xl backdrop-blur-md border border-white/20 flex items-center gap-3 font-bold text-sm text-white pointer-events-auto ${notification.type === 'error' ? 'bg-rose-500/90 shadow-rose-500/20' : 'bg-emerald-500/90 shadow-emerald-500/20'}`}>
             <span>{notification.message}</span>
             <button onClick={() => setNotification(null)} className="ml-2 hover:opacity-75 transition-opacity">✕</button>
           </div>
