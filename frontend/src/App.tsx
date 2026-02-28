@@ -6,6 +6,7 @@ import BatchPage from './pages/BatchPage';
 import ReviewQueue from './pages/ReviewQueue';
 import ExecutionMonitor from './pages/ExecutionMonitor';
 import AuditLog from './pages/AuditLog';
+import AgentPage from './pages/AgentPage';
 import Settings from './pages/Settings';
 import AnimatedLogo from './components/AnimatedLogo';
 
@@ -61,6 +62,7 @@ export default function App() {
             <Route path="/review" element={<ReviewQueue />} />
             <Route path="/execution" element={<ExecutionMonitor />} />
             <Route path="/audit" element={<AuditLog />} />
+            <Route path="/agent" element={<AgentPage />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
         </Routes>

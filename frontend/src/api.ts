@@ -7,6 +7,7 @@ import type {
   Batch, BatchDetail, PayoutItem, PayoutLeg, AuditLog,
   PolicyRunResponse, ExecutionResponse, SeedResponse,
   HealthResponse, Settings, WalletSetupResponse, WalletBalanceResponse,
+  AgentStatus, AgentActivity, AgentStrategyInfo,
 } from './types';
 
 const BASE = '/api';
@@ -76,3 +77,22 @@ export const listAuditLogs = (params?: { entity_type?: string; entity_id?: strin
   const q = qs.toString();
   return request<AuditLog[]>(`/audit-logs${q ? '?' + q : ''}`);
 };
+
+// ── Agent ───────────────────────────────────────────────────────────────
+export const getAgentStatus = () => request<AgentStatus>('/agent/status');
+export const controlAgent = (action: 'start' | 'stop', strategy?: string) =>
+  request<AgentStatus>('/agent/control', {
+    method: 'POST',
+    body: JSON.stringify({ action, strategy }),
+  });
+export const listAgentActivity = (params?: { limit?: number; action?: string }) => {
+  const qs = new URLSearchParams();
+  if (params?.limit) qs.set('limit', String(params.limit));
+  if (params?.action) qs.set('action', params.action);
+  const q = qs.toString();
+  return request<AgentActivity[]>(`/agent/activity${q ? '?' + q : ''}`);
+};
+export const clearAgentActivity = () =>
+  request<{ cleared: boolean }>('/agent/activity', { method: 'DELETE' });
+export const getAgentStrategies = () =>
+  request<Record<string, AgentStrategyInfo>>('/agent/strategies');

@@ -6,6 +6,7 @@ const NAV = [
   { to: '/batches', label: 'Batches', icon: '📦' },
   { to: '/review', label: 'Review Queue', icon: '🔍' },
   { to: '/execution', label: 'Execution', icon: '⚡' },
+  { to: '/agent', label: 'Copilot Agent', icon: '🤖' },
   { to: '/audit', label: 'Audit Log', icon: '📋' },
   { to: '/settings', label: 'Settings', icon: '⚙️' },
 ];

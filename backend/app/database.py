@@ -82,6 +82,16 @@ async def init_db():
             key TEXT PRIMARY KEY,
             value TEXT
         );
+
+        CREATE TABLE IF NOT EXISTS agent_activity (
+            id TEXT PRIMARY KEY,
+            action TEXT NOT NULL,
+            entity_type TEXT,
+            entity_id TEXT,
+            details TEXT,
+            strategy TEXT,
+            timestamp TEXT
+        );
     """)
 
     await db.commit()
