@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Package, Banknote, Receipt, CheckCircle, XCircle } from 'lucide-react';
 import { listBatches, getHealth, listExecutions, getTreasuryBalance } from '../api';
 import type { Batch, HealthResponse, PayoutItem, WalletBalanceResponse } from '../types';
 import StatusBadge from '../components/StatusBadge';
@@ -92,11 +93,11 @@ export default function Dashboard() {
 
       {/* Stats Row */}
       <div className="grid grid-cols-5 gap-5">
-        <StatCard label="Total Batches" value={batches.length} icon="📦" />
-        <StatCard label="Total Volume" value={`$${totalVolume.toLocaleString()}`} icon="💸" />
-        <StatCard label="Total Items" value={totalItems} icon="🧾" />
-        <StatCard label="Items Settled" value={settled} color="text-emerald-600" bg="bg-emerald-50/50" icon="✅" />
-        <StatCard label="Items Failed" value={failed} color="text-rose-600" bg="bg-rose-50/50" icon="❌" />
+        <StatCard label="Total Batches" value={batches.length} icon={<Package size={24} className="text-blue-500" />} />
+        <StatCard label="Total Volume" value={`$${totalVolume.toLocaleString()}`} icon={<Banknote size={24} className="text-emerald-500" />} />
+        <StatCard label="Total Items" value={totalItems} icon={<Receipt size={24} className="text-purple-500" />} />
+        <StatCard label="Items Settled" value={settled} color="text-emerald-600" bg="bg-emerald-50/50" icon={<CheckCircle size={24} className="text-emerald-600" />} />
+        <StatCard label="Items Failed" value={failed} color="text-rose-600" bg="bg-rose-50/50" icon={<XCircle size={24} className="text-rose-600" />} />
       </div>
 
       {/* Main Treasury Card - Updated to match image gradient */}
@@ -256,12 +257,12 @@ export default function Dashboard() {
   );
 }
 
-function StatCard({ label, value, color, bg, icon }: { label: string; value: string | number; color?: string; bg?: string; icon?: string }) {
+function StatCard({ label, value, color, bg, icon }: { label: string; value: string | number; color?: string; bg?: string; icon?: React.ReactNode }) {
   return (
     <div className={`glass-panel rounded-3xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-cyan-900/10 group ${bg || 'bg-white/80 border-slate-100'}`}>
       <div className="flex items-center justify-between mb-4">
         <div className="text-xs text-slate-500 font-bold uppercase tracking-widest">{label}</div>
-        {icon && <div className="text-2xl p-2 bg-slate-50 rounded-2xl shadow-inner border border-white group-hover:scale-110 transition-transform">{icon}</div>}
+        {icon && <div className="p-2 bg-slate-50 rounded-2xl shadow-inner border border-white group-hover:scale-110 transition-transform">{icon}</div>}
       </div>
       <div className={`text-4xl font-black tracking-tight ${color || 'text-slate-900'}`}>{value}</div>
     </div>

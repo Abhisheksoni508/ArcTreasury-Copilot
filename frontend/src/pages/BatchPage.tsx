@@ -4,6 +4,7 @@ import {
   listBatches, getBatch, seedDemoData, runPolicy, executeBatch,
   getReviewQueue, decideItem, listExecutions, retryItem,
 } from '../api';
+import { Leaf, ShieldAlert, Zap, Eye, CheckCircle2, Ticket, AlertTriangle, AlertCircle, RefreshCw, Rocket } from 'lucide-react';
 import type {
   Batch, BatchDetail, PayoutItem, SeedResponse,
   PolicyRunResponse, ExecutionResponse,
@@ -57,11 +58,11 @@ function PulsingDot({ color = 'bg-blue-500' }: { color?: string }) {
 /* ── step indicator ─────────────────────────────────────────────────── */
 function StepIndicator({ current }: { current: AutoStep }) {
   const steps = [
-    { key: 'seeding', label: 'Seed', icon: '🌱' },
-    { key: 'running-policy', label: 'Policy', icon: '🛡️' },
-    { key: 'executing', label: 'Execute', icon: '⚡' },
-    { key: 'review', label: 'Review', icon: '👁️' },
-    { key: 'complete', label: 'Done', icon: '✅' },
+    { key: 'seeding', label: 'Seed', icon: <Leaf size={18} /> },
+    { key: 'running-policy', label: 'Policy', icon: <ShieldAlert size={18} /> },
+    { key: 'executing', label: 'Execute', icon: <Zap size={18} /> },
+    { key: 'review', label: 'Review', icon: <Eye size={18} /> },
+    { key: 'complete', label: 'Done', icon: <CheckCircle2 size={18} /> },
   ];
 
   const ci = stepIndex(current);
@@ -76,12 +77,12 @@ function StepIndicator({ current }: { current: AutoStep }) {
           <div key={s.key} className="flex items-center flex-1 last:flex-none">
             <div className="flex flex-col items-center">
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center text-lg transition-all duration-500
-                  ${done ? 'bg-green-100 ring-2 ring-green-400' :
-                    active ? 'bg-blue-100 ring-2 ring-blue-400 scale-110' :
-                    'bg-gray-100 ring-1 ring-gray-300'}`}
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500
+                  ${done ? 'bg-green-100 ring-2 ring-green-400 text-green-600' :
+                    active ? 'bg-blue-100 ring-2 ring-blue-400 scale-110 text-blue-600' :
+                      'bg-gray-100 ring-1 ring-gray-300 text-gray-400'}`}
               >
-                {done ? '✓' : s.icon}
+                {done ? <CheckCircle2 size={18} /> : s.icon}
               </div>
               <span className={`text-xs mt-1 font-medium transition-colors duration-300
                 ${done ? 'text-green-600' : active ? 'text-blue-600' : 'text-gray-400'}`}>
@@ -134,7 +135,7 @@ export default function BatchPage() {
     }
   };
 
-  useEffect(() => { refresh().catch(() => {}); }, [selectedId]);
+  useEffect(() => { refresh().catch(() => { }); }, [selectedId]);
 
   // auto-scroll when step changes
   useEffect(() => {
@@ -307,7 +308,7 @@ export default function BatchPage() {
                 disabled={!!loading}
                 className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg text-sm font-medium hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 shadow-md flex items-center gap-2"
               >
-                <span>🚀</span> Seed &amp; AutoPilot
+                <Rocket size={16} /> Seed &amp; AutoPilot
               </button>
             </>
           )}
@@ -324,8 +325,8 @@ export default function BatchPage() {
 
       {/* ── Error banner ──────────────────────────────────────────────── */}
       {error && (
-        <div className="px-4 py-3 rounded-lg text-sm bg-red-50 text-red-700 border border-red-200">
-          ⚠️ {error}
+        <div className="flex items-center gap-2 px-4 py-3 rounded-lg text-sm bg-red-50 text-red-700 border border-red-200">
+          <AlertCircle size={16} /> {error}
         </div>
       )}
 
@@ -347,7 +348,7 @@ export default function BatchPage() {
           <div className={`bg-white rounded-xl shadow-sm border overflow-hidden transition-all duration-500
             ${stepIndex(step) >= 0 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             <div className="px-5 py-4 flex items-center gap-3">
-              <span className="text-2xl">🌱</span>
+              <span className="text-green-600 bg-green-50 p-2 rounded-xl"><Leaf size={24} /></span>
               <div className="flex-1">
                 <h3 className="font-semibold">Step 1 — Seed Demo Data</h3>
                 {step === 'seeding' && (
@@ -379,7 +380,7 @@ export default function BatchPage() {
             <div className={`bg-white rounded-xl shadow-sm border overflow-hidden transition-all duration-500
               ${stepIndex(step) >= stepIndex('seeded') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
               <div className="px-5 py-4 flex items-center gap-3">
-                <span className="text-2xl">🛡️</span>
+                <span className="text-purple-600 bg-purple-50 p-2 rounded-xl"><ShieldAlert size={24} /></span>
                 <div className="flex-1">
                   <h3 className="font-semibold">Step 2 — Policy Engine Evaluation</h3>
                   {step === 'seeded' && (
@@ -413,9 +414,9 @@ export default function BatchPage() {
                             <span key={d} className={`px-3 py-1 rounded-full text-xs font-medium
                               ${d === 'APPROVED' ? 'bg-green-100 text-green-700' :
                                 d === 'REVIEW' ? 'bg-yellow-100 text-yellow-700' :
-                                d === 'REJECTED' ? 'bg-red-100 text-red-700' :
-                                d === 'HELD' ? 'bg-orange-100 text-orange-700' :
-                                'bg-gray-100 text-gray-700'}`}>
+                                  d === 'REJECTED' ? 'bg-red-100 text-red-700' :
+                                    d === 'HELD' ? 'bg-orange-100 text-orange-700' :
+                                      'bg-gray-100 text-gray-700'}`}>
                               {c} {d}
                             </span>
                           ));
@@ -442,7 +443,7 @@ export default function BatchPage() {
             <div className={`bg-white rounded-xl shadow-sm border overflow-hidden transition-all duration-500
               ${stepIndex(step) >= stepIndex('policy-done') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
               <div className="px-5 py-4 flex items-center gap-3">
-                <span className="text-2xl">⚡</span>
+                <span className="text-blue-600 bg-blue-50 p-2 rounded-xl"><Zap size={24} /></span>
                 <div className="flex-1">
                   <h3 className="font-semibold">Step 3 — On-Chain Execution</h3>
                   {step === 'policy-done' && (
@@ -476,7 +477,7 @@ export default function BatchPage() {
                             <span key={s} className={`px-3 py-1 rounded-full text-xs font-medium
                               ${s === 'PROCESSING' || s === 'SETTLED' ? 'bg-green-100 text-green-700' :
                                 s === 'FAILED' ? 'bg-red-100 text-red-700' :
-                                'bg-gray-100 text-gray-700'}`}>
+                                  'bg-gray-100 text-gray-700'}`}>
                               {c} {s}
                             </span>
                           ));
@@ -503,7 +504,7 @@ export default function BatchPage() {
             <div className="bg-white rounded-xl shadow-sm border overflow-hidden transition-all duration-500 border-yellow-300">
               <div className="px-5 py-4 bg-yellow-50 border-b border-yellow-200">
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">👁️</span>
+                  <span className="text-yellow-600 bg-yellow-100 p-2 rounded-xl"><Eye size={24} /></span>
                   <div>
                     <h3 className="font-semibold text-yellow-800">Step 4 — Human Review Required</h3>
                     <p className="text-sm text-yellow-700 mt-1">
@@ -530,7 +531,7 @@ export default function BatchPage() {
                             {item.currency} — <span className="capitalize">{item.category.replace('_', ' ')}</span>
                           </div>
                           <div className="font-mono text-xs text-gray-400">{item.recipient_address}</div>
-                          <div className="text-orange-600 font-medium">⚠️ {item.decision_reason}</div>
+                          <div className="flex items-center gap-1 text-orange-600 font-medium"><AlertTriangle size={14} /> {item.decision_reason}</div>
                           <div className="flex items-center gap-2">
                             <span className="text-gray-500">Risk Score:</span>
                             <span className={`font-bold text-lg ${item.risk_score >= 75 ? 'text-red-600' : item.risk_score >= 50 ? 'text-orange-600' : 'text-yellow-600'}`}>
@@ -568,7 +569,7 @@ export default function BatchPage() {
               {/* Success banner */}
               <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200 px-6 py-5">
                 <div className="flex items-center gap-3 mb-3">
-                  <span className="text-3xl">🎉</span>
+                  <span className="text-emerald-600 bg-emerald-100 p-2 rounded-xl"><CheckCircle2 size={28} /></span>
                   <div>
                     <h3 className="font-bold text-lg text-green-800">Batch Complete!</h3>
                     <p className="text-sm text-green-700">
@@ -597,7 +598,7 @@ export default function BatchPage() {
                 <div className="bg-white rounded-xl shadow-sm border border-red-200 overflow-hidden">
                   <div className="px-5 py-4 bg-red-50 border-b border-red-200">
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl">🚨</span>
+                      <span className="text-red-600 bg-red-100 p-2 rounded-xl"><AlertTriangle size={24} /></span>
                       <div>
                         <h3 className="font-semibold text-red-800">
                           Complications — {failedItems.length} Unsuccessful Execution{failedItems.length > 1 ? 's' : ''}
@@ -632,9 +633,9 @@ export default function BatchPage() {
                         <button
                           onClick={() => handleRetry(item.id)}
                           disabled={retryLoading === item.id}
-                          className="px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-medium hover:bg-amber-600 disabled:opacity-50 transition-colors"
+                          className="px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-medium hover:bg-amber-600 disabled:opacity-50 transition-colors flex items-center gap-2"
                         >
-                          {retryLoading === item.id ? 'Retrying...' : '🔄 Retry'}
+                          {retryLoading === item.id ? 'Retrying...' : <><RefreshCw size={14} /> Retry</>}
                         </button>
                       </div>
                     ))}
@@ -643,9 +644,9 @@ export default function BatchPage() {
               )}
 
               {failedItems.length === 0 && (
-                <div className="bg-green-50 rounded-xl border border-green-200 px-6 py-8 text-center">
-                  <span className="text-4xl">🎊</span>
-                  <p className="text-green-700 font-medium mt-2">All executions succeeded — no complications!</p>
+                <div className="bg-green-50 rounded-xl border border-green-200 px-6 py-8 text-center flex flex-col items-center">
+                  <span className="text-green-600 bg-green-200/50 p-4 rounded-full mb-3"><CheckCircle2 size={32} /></span>
+                  <p className="text-green-700 font-medium tracking-wide">All executions succeeded — no complications!</p>
                 </div>
               )}
             </div>
@@ -760,8 +761,8 @@ export default function BatchPage() {
           )}
 
           {batches.length === 0 && (
-            <div className="text-center py-16 text-gray-400">
-              <p className="text-4xl mb-4">🚀</p>
+            <div className="text-center py-16 text-gray-400 flex flex-col items-center">
+              <span className="text-gray-300 bg-gray-100 p-4 rounded-3xl mb-4"><Ticket size={32} /></span>
               <p className="text-lg font-medium text-gray-600">No batches yet</p>
               <p className="text-sm mt-1">Click <strong>"Seed &amp; AutoPilot"</strong> to see the full automated pipeline in action</p>
             </div>

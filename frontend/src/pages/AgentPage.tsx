@@ -7,16 +7,17 @@ import {
   getAgentStrategies,
 } from '../api';
 import type { AgentStatus, AgentActivity, AgentStrategyInfo } from '../types';
+import { ClipboardCheck, CheckCircle2, Rocket, BarChart2, RefreshCw, XCircle, Bot, Zap } from 'lucide-react';
 
-const ACTION_ICONS: Record<string, string> = {
-  AUTO_POLICY: '📋',
-  AUTO_APPROVE: '✅',
-  AUTO_EXECUTE: '🚀',
-  EXECUTE_RESULT: '📊',
-  AUTO_RETRY: '🔄',
-  RETRY_RESULT: '📊',
-  IDLE: '💤',
-  ERROR: '❌',
+const ACTION_ICONS: Record<string, React.ReactNode> = {
+  AUTO_POLICY: <ClipboardCheck size={16} />,
+  AUTO_APPROVE: <CheckCircle2 size={16} />,
+  AUTO_EXECUTE: <Rocket size={16} />,
+  EXECUTE_RESULT: <BarChart2 size={16} />,
+  AUTO_RETRY: <RefreshCw size={16} />,
+  RETRY_RESULT: <BarChart2 size={16} />,
+  IDLE: <Zap size={16} className="text-gray-400" />,
+  ERROR: <XCircle size={16} />,
 };
 
 const ACTION_COLORS: Record<string, string> = {
@@ -55,7 +56,7 @@ export default function AgentPage() {
 
   useEffect(() => {
     refresh();
-    getAgentStrategies().then(setStrategies).catch(() => {});
+    getAgentStrategies().then(setStrategies).catch(() => { });
   }, []);
 
   // Auto-poll when agent is running
@@ -103,7 +104,7 @@ export default function AgentPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
-            🤖 Treasury Copilot Agent
+            <Bot size={28} className="text-blue-600" /> Treasury Copilot Agent
           </h2>
           <p className="text-sm text-gray-500 mt-1">
             Autonomous payout orchestration — monitors, approves, executes, and retries
@@ -133,11 +134,10 @@ export default function AgentPage() {
                   key={name}
                   onClick={() => setSelectedStrategy(name)}
                   disabled={isRunning}
-                  className={`text-left px-4 py-3 rounded-lg border-2 text-sm transition-colors ${
-                    selectedStrategy === name
+                  className={`text-left px-4 py-3 rounded-lg border-2 text-sm transition-colors ${selectedStrategy === name
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 hover:border-gray-300'
-                  } ${isRunning ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    } ${isRunning ? 'opacity-60 cursor-not-allowed' : ''}`}
                 >
                   <div className="flex items-center gap-2">
                     <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase ${STRATEGY_COLORS[name] || 'bg-gray-100'}`}>
@@ -210,8 +210,8 @@ export default function AgentPage() {
         </div>
 
         {activities.length === 0 ? (
-          <div className="px-5 py-12 text-center text-gray-400">
-            <div className="text-3xl mb-2">🤖</div>
+          <div className="px-5 py-12 text-center text-gray-400 flex flex-col items-center">
+            <span className="bg-gray-100 text-gray-400 p-4 rounded-full mb-3"><Bot size={32} /></span>
             <p className="text-sm">No agent activity yet.</p>
             <p className="text-xs mt-1">Start the agent and seed some demo data to see it in action.</p>
           </div>
@@ -219,7 +219,7 @@ export default function AgentPage() {
           <div className="divide-y max-h-[500px] overflow-y-auto">
             {activities.map((a) => (
               <div key={a.id} className="px-5 py-3 flex items-start gap-3 hover:bg-gray-50 transition-colors">
-                <span className="text-lg mt-0.5">{ACTION_ICONS[a.action] || '🔹'}</span>
+                <span className="mt-1 flex items-center justify-center w-6">{ACTION_ICONS[a.action] || <Zap size={16} className="text-gray-400" />}</span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${ACTION_COLORS[a.action] || 'text-gray-600 bg-gray-50 border-gray-200'}`}>
@@ -248,22 +248,22 @@ export default function AgentPage() {
         <h3 className="font-semibold text-sm text-gray-700 mb-3">How the Agent Works</h3>
         <div className="grid grid-cols-4 gap-4 text-xs text-gray-600">
           <div className="bg-white rounded-lg p-3 border">
-            <div className="text-lg mb-1">📋</div>
+            <div className="mb-2 text-blue-600 bg-blue-50 w-fit p-1.5 rounded-lg"><ClipboardCheck size={20} /></div>
             <div className="font-semibold text-gray-800">1. Auto-Policy</div>
             <div className="mt-1">Detects new DRAFT batches and runs the 5-rule risk engine automatically.</div>
           </div>
           <div className="bg-white rounded-lg p-3 border">
-            <div className="text-lg mb-1">✅</div>
+            <div className="mb-2 text-green-600 bg-green-50 w-fit p-1.5 rounded-lg"><CheckCircle2 size={20} /></div>
             <div className="font-semibold text-gray-800">2. Auto-Approve</div>
             <div className="mt-1">Approves REVIEW/HELD items when risk score and amount are below strategy thresholds.</div>
           </div>
           <div className="bg-white rounded-lg p-3 border">
-            <div className="text-lg mb-1">🚀</div>
+            <div className="mb-2 text-purple-600 bg-purple-50 w-fit p-1.5 rounded-lg"><Rocket size={20} /></div>
             <div className="font-semibold text-gray-800">3. Auto-Execute</div>
             <div className="mt-1">Triggers batch execution when all decidable items are resolved.</div>
           </div>
           <div className="bg-white rounded-lg p-3 border">
-            <div className="text-lg mb-1">🔄</div>
+            <div className="mb-2 text-amber-600 bg-amber-50 w-fit p-1.5 rounded-lg"><RefreshCw size={20} /></div>
             <div className="font-semibold text-gray-800">4. Auto-Retry</div>
             <div className="mt-1">Retries failed transfers with exponential backoff up to the strategy's max retries.</div>
           </div>
