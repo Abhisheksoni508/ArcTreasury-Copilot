@@ -4,6 +4,7 @@ import { Package, Banknote, Receipt, CheckCircle, XCircle } from 'lucide-react';
 import { listBatches, getHealth, listExecutions, getTreasuryBalance } from '../api';
 import type { Batch, HealthResponse, PayoutItem, WalletBalanceResponse } from '../types';
 import StatusBadge from '../components/StatusBadge';
+import AnimatedNumber from '../components/AnimatedNumber';
 
 export default function Dashboard() {
   const [batches, setBatches] = useState<Batch[]>([]);
@@ -264,7 +265,7 @@ function StatCard({ label, value, color, bg, icon }: { label: string; value: str
         <div className="text-xs text-slate-500 font-bold uppercase tracking-widest">{label}</div>
         {icon && <div className="p-2 bg-slate-50 rounded-2xl shadow-inner border border-white group-hover:scale-110 transition-transform">{icon}</div>}
       </div>
-      <div className={`text-4xl font-black tracking-tight ${color || 'text-slate-900'}`}>{value}</div>
+      <div className={`text-4xl font-black tracking-tight ${color || 'text-slate-900'}`}><AnimatedNumber value={value} /></div>
     </div>
   );
 }

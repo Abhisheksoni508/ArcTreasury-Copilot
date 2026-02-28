@@ -4,6 +4,7 @@ import {
   Banknote, BarChart3, TrendingUp, Gem, PieChart as PieChartIcon, FileText, Radio, ClipboardList,
   Globe, Hexagon, Diamond, Circle, Disc, Square, Triangle, Shuffle, Zap, ArrowDown, ArrowUp
 } from 'lucide-react';
+import AnimatedNumber from '../components/AnimatedNumber';
 
 import { PieChart as RechartsPieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -631,7 +632,7 @@ function StatCard({ label, value, icon, accent }: { label: string; value: string
         <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{label}</span>
         <span className="text-lg">{icon}</span>
       </div>
-      <div className={`text-xl font-extrabold ${accent || 'text-slate-900'}`}>{value}</div>
+      <div className={`text-xl font-extrabold ${accent || 'text-slate-900'}`}><AnimatedNumber value={value} /></div>
     </div>
   );
 }
