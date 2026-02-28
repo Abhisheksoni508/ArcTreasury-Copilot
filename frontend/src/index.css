@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+    button {
+        @apply transition-all duration-200 ease-out outline-none active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+    }
+    button:not(:disabled):hover {
+        @apply shadow-md -translate-y-[1px];
+    }
+}
+
 @layer utilities {
     .animate-blob {
         animation: blob 10s infinite alternate;

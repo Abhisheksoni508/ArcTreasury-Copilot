@@ -247,23 +247,23 @@ export default function AgentPage() {
       <div className="bg-gray-50 rounded-xl border p-5">
         <h3 className="font-semibold text-sm text-gray-700 mb-3">How the Agent Works</h3>
         <div className="grid grid-cols-4 gap-4 text-xs text-gray-600">
-          <div className="bg-white rounded-lg p-3 border">
-            <div className="mb-2 text-blue-600 bg-blue-50 w-fit p-1.5 rounded-lg"><ClipboardCheck size={20} /></div>
+          <div className="bg-white rounded-lg p-3 border transition-all duration-300 hover:-translate-y-1.5 hover:shadow-lg hover:border-blue-300 cursor-default">
+            <div className="mb-2 text-blue-600 bg-blue-50 w-fit p-1.5 rounded-lg transition-transform duration-300 hover:scale-110"><ClipboardCheck size={20} /></div>
             <div className="font-semibold text-gray-800">1. Auto-Policy</div>
             <div className="mt-1">Detects new DRAFT batches and runs the 5-rule risk engine automatically.</div>
           </div>
-          <div className="bg-white rounded-lg p-3 border">
-            <div className="mb-2 text-green-600 bg-green-50 w-fit p-1.5 rounded-lg"><CheckCircle2 size={20} /></div>
+          <div className="bg-white rounded-lg p-3 border transition-all duration-300 hover:-translate-y-1.5 hover:shadow-lg hover:border-green-300 cursor-default">
+            <div className="mb-2 text-green-600 bg-green-50 w-fit p-1.5 rounded-lg transition-transform duration-300 hover:scale-110"><CheckCircle2 size={20} /></div>
             <div className="font-semibold text-gray-800">2. Auto-Approve</div>
             <div className="mt-1">Approves REVIEW/HELD items when risk score and amount are below strategy thresholds.</div>
           </div>
-          <div className="bg-white rounded-lg p-3 border">
-            <div className="mb-2 text-purple-600 bg-purple-50 w-fit p-1.5 rounded-lg"><Rocket size={20} /></div>
+          <div className="bg-white rounded-lg p-3 border transition-all duration-300 hover:-translate-y-1.5 hover:shadow-lg hover:border-purple-300 cursor-default">
+            <div className="mb-2 text-purple-600 bg-purple-50 w-fit p-1.5 rounded-lg transition-transform duration-300 hover:scale-110"><Rocket size={20} /></div>
             <div className="font-semibold text-gray-800">3. Auto-Execute</div>
             <div className="mt-1">Triggers batch execution when all decidable items are resolved.</div>
           </div>
-          <div className="bg-white rounded-lg p-3 border">
-            <div className="mb-2 text-amber-600 bg-amber-50 w-fit p-1.5 rounded-lg"><RefreshCw size={20} /></div>
+          <div className="bg-white rounded-lg p-3 border transition-all duration-300 hover:-translate-y-1.5 hover:shadow-lg hover:border-amber-300 cursor-default">
+            <div className="mb-2 text-amber-600 bg-amber-50 w-fit p-1.5 rounded-lg transition-transform duration-300 hover:scale-110"><RefreshCw size={20} /></div>
             <div className="font-semibold text-gray-800">4. Auto-Retry</div>
             <div className="mt-1">Retries failed transfers with exponential backoff up to the strategy's max retries.</div>
           </div>
