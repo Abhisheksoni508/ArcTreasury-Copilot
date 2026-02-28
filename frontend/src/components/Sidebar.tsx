@@ -14,7 +14,7 @@ const NAV = [
 
 export default function Sidebar() {
   return (
-    <aside className="w-64 bg-white dark:bg-slate-900/60 backdrop-blur-xl border-r border-white/60 shadow-2xl shadow-blue-900/5 flex flex-col min-h-screen relative z-20">
+    <aside className="w-64 bg-white/60 backdrop-blur-xl border-r border-white/60 shadow-2xl shadow-blue-900/5 flex flex-col min-h-screen relative z-20">
       <div className="px-6 py-8">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 flex items-center justify-center shrink-0">
@@ -36,8 +36,8 @@ export default function Sidebar() {
             className={({ isActive }) =>
               `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 group
                ${isActive
-                ? 'bg-gradient-to-r from-cyan-50 to-purple-50 text-purple-700 border dark:border-slate-800 border-purple-100 shadow-sm'
-                : 'text-slate-500 hover:bg-white dark:bg-slate-900 hover:text-slate-900 border dark:border-slate-800 border-transparent shadow-sm shadow-transparent hover:shadow-slate-200/50'}`
+                ? 'bg-gradient-to-r from-cyan-50 to-purple-50 text-purple-700 border border-purple-100 shadow-sm'
+                : 'text-slate-500 hover:bg-white hover:text-slate-900 border border-transparent shadow-sm shadow-transparent hover:shadow-slate-200/50'}`
             }
           >
             <span className={`text-base transition-transform duration-200 group-hover:scale-110`}>{n.icon}</span>
@@ -46,7 +46,7 @@ export default function Sidebar() {
         ))}
       </nav>
       <div className="p-6">
-        <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-4 border dark:border-slate-800 border-slate-200/60 shadow-inner">
+        <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-4 border border-slate-200/60 shadow-inner">
           <p className="text-xs text-slate-500 leading-relaxed font-medium">
             AI-powered USDC payouts, policy checks, and treasury automation on Arc.
           </p>
