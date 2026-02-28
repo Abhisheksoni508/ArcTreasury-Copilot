@@ -13,13 +13,17 @@ import AnimatedLogo from './components/AnimatedLogo';
 function SplashScreen() {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-50 transition-all duration-700 opacity-100">
-      <div className="flex flex-col items-center gap-6 animate-pulse duration-1000">
-        <div className="relative transform scale-125 mb-4">
+      <div className="flex items-center justify-center">
+        <div className="relative transform scale-125 shrink-0 z-10">
           <AnimatedLogo />
         </div>
-        <div className="text-center space-y-2 opacity-0 fade-in-up" style={{ animationDelay: '1.2s' }}>
-          <h1 className="text-3xl font-black tracking-tight text-slate-900 drop-shadow-sm">ArcTreasury <span className="text-slate-700">Copilot</span></h1>
-          <p className="text-sm font-semibold text-slate-500 tracking-wide uppercase">AI-powered USDC Payouts</p>
+        <div className="text-left space-y-2 text-reveal">
+          <h1 className="text-4xl font-black tracking-tight text-slate-900 drop-shadow-sm whitespace-nowrap">
+            ArcTreasury <span className="text-slate-700">Copilot</span>
+          </h1>
+          <p className="text-sm font-semibold text-slate-500 tracking-wide uppercase whitespace-nowrap mt-1">
+            AI-powered USDC Payouts
+          </p>
         </div>
       </div>
     </div>

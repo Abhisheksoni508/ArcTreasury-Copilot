@@ -105,6 +105,28 @@
     }
 }
 
+@keyframes revealText {
+    0% {
+        max-width: 0;
+        opacity: 0;
+        margin-left: 0;
+    }
+
+    100% {
+        max-width: 400px;
+        opacity: 1;
+        margin-left: 1.5rem;
+    }
+}
+
+.text-reveal {
+    animation: revealText 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards 1.2s;
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    margin-left: 0;
+}
+
 body {
     @apply bg-slate-50 text-slate-900;
 }
