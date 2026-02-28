@@ -172,16 +172,6 @@ export default function TreasuryPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-700 pb-12 relative">
-      {/* Top Banner Notification */}
-      {notification && (
-        <div className="fixed top-4 left-0 w-full z-[99999] flex justify-center animate-in slide-in-from-top-4 fade-in duration-300 pointer-events-none">
-          <div className={`px-6 py-3 rounded-2xl shadow-2xl backdrop-blur-md border border-white/20 flex items-center gap-3 font-bold text-sm text-white pointer-events-auto ${notification.type === 'error' ? 'bg-rose-500/90 shadow-rose-500/20' : 'bg-emerald-500/90 shadow-emerald-500/20'}`}>
-            <span>{notification.message}</span>
-            <button onClick={() => setNotification(null)} className="ml-2 hover:opacity-75 transition-opacity">✕</button>
-          </div>
-        </div>
-      )}
-
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -368,13 +358,21 @@ export default function TreasuryPage() {
                 ))}
               </div>
               {allocAsset && (
-                <div className="flex gap-2 mt-3">
-                  <input type="number" value={allocAmount} onChange={e => setAllocAmount(e.target.value)}
-                    placeholder="Amount USDC" className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium" />
-                  <button onClick={handleAllocate} disabled={allocating}
-                    className="px-5 py-2 bg-purple-600 text-white rounded-xl font-bold text-sm hover:bg-purple-700 disabled:opacity-50 transition-colors">
-                    {allocating ? '...' : `Allocate to ${allocAsset}`}
-                  </button>
+                <div className="mt-3 space-y-2">
+                  {notification && (
+                    <div className={`px-4 py-2.5 rounded-xl flex items-center justify-between text-sm font-bold animate-in slide-in-from-top-2 fade-in duration-200 ${notification.type === 'error' ? 'bg-rose-50 text-rose-600 border border-rose-200' : 'bg-emerald-50 text-emerald-600 border border-emerald-200'}`}>
+                      <span>{notification.message}</span>
+                      <button onClick={() => setNotification(null)} className="ml-2 hover:opacity-75 transition-opacity text-lg leading-none">✕</button>
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <input type="number" value={allocAmount} onChange={e => setAllocAmount(e.target.value)}
+                      placeholder="Amount USDC" className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium" />
+                    <button onClick={handleAllocate} disabled={allocating}
+                      className="px-5 py-2 bg-purple-600 text-white rounded-xl font-bold text-sm hover:bg-purple-700 disabled:opacity-50 transition-colors">
+                      {allocating ? '...' : `Allocate to ${allocAsset}`}
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
