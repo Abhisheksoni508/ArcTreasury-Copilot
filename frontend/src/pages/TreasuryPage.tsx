@@ -61,6 +61,8 @@ export default function TreasuryPage() {
   const [depositAmt, setDepositAmt] = useState('');
   const [withdrawAmt, setWithdrawAmt] = useState('');
   const [gwLoading, setGwLoading] = useState(false);
+  const [selectedRail, setSelectedRail] = useState('wire');
+  const [selectedCurrency, setSelectedCurrency] = useState('USD');
 
   // Bridge state
   const [domains, setDomains] = useState<CctpDomains | null>(null);
@@ -144,7 +146,7 @@ export default function TreasuryPage() {
   const handleDeposit = async () => {
     if (!depositAmt) return;
     setGwLoading(true);
-    try { await createDeposit(parseFloat(depositAmt)); setDepositAmt(''); await fetchAll(false); }
+    try { await createDeposit(parseFloat(depositAmt), selectedCurrency, selectedRail); setDepositAmt(''); await fetchAll(false); }
     catch (e: unknown) { setError(e instanceof Error ? e.message : 'Deposit failed'); }
     finally { setGwLoading(false); }
   };
@@ -152,7 +154,7 @@ export default function TreasuryPage() {
   const handleWithdraw = async () => {
     if (!withdrawAmt) return;
     setGwLoading(true);
-    try { await createWithdrawal(parseFloat(withdrawAmt)); setWithdrawAmt(''); await fetchAll(false); }
+    try { await createWithdrawal(parseFloat(withdrawAmt), selectedCurrency, selectedRail); setWithdrawAmt(''); await fetchAll(false); }
     catch (e: unknown) { setError(e instanceof Error ? e.message : 'Withdrawal failed'); }
     finally { setGwLoading(false); }
   };
@@ -506,21 +508,56 @@ export default function TreasuryPage() {
             </div>
           </div>
 
-          {/* Payment Rails */}
+          {/* Payment Rails Selection */}
           <div className="bg-white/60 backdrop-blur rounded-2xl p-5 border border-white shadow-sm">
-            <h3 className="font-extrabold text-slate-900 mb-4"><span className="flex items-center gap-2"><Radio size={20} /> Supported Payment Rails</span></h3>
+            <h3 className="font-extrabold text-slate-900 mb-4"><span className="flex items-center gap-2"><Radio size={20} /> Select Payment Method</span></h3>
             <div className="grid grid-cols-3 gap-4">
-              {Object.entries(gatewayInfo.payment_rails).map(([key, rail]) => (
-                <div key={key} className="bg-gradient-to-br from-slate-50 to-white rounded-xl p-4 border border-slate-100">
-                  <h4 className="font-bold text-slate-800">{rail.name}</h4>
-                  <div className="mt-2 space-y-1 text-xs text-slate-500">
-                    <div>Currencies: <strong>{rail.currencies.join(', ')}</strong></div>
-                    <div>Min: <strong>{usd(rail.min_amount)}</strong> · Max: <strong>{usd(rail.max_amount)}</strong></div>
-                    <div>Time: <strong>{rail.estimated_time}</strong></div>
-                    <div>Fee: <strong>{rail.fee_percent}%</strong></div>
-                  </div>
+              {Object.entries(gatewayInfo.payment_rails).map(([key, rail]) => {
+                const isActive = selectedRail === key;
+                return (
+                  <button key={key} onClick={() => { setSelectedRail(key); setSelectedCurrency(rail.currencies[0]); }}
+                    className={`text-left rounded-xl p-4 border-2 transition-all ${isActive ? 'border-purple-400 bg-purple-50/50 shadow-md shadow-purple-100' : 'border-slate-100 bg-gradient-to-br from-slate-50 to-white hover:border-slate-300'}`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className={`font-bold ${isActive ? 'text-purple-800' : 'text-slate-800'}`}>{rail.name}</h4>
+                      {isActive && <span className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-pulse" />}
+                    </div>
+                    <div className="space-y-1 text-xs text-slate-500">
+                      <div className="flex items-center gap-1.5">
+                        <Globe size={12} className="text-slate-400" />
+                        <span>Currencies: <strong className={isActive ? 'text-purple-700' : ''}>{rail.currencies.join(', ')}</strong></span>
+                      </div>
+                      <div>Min: <strong>{usd(rail.min_amount)}</strong> · Max: <strong>{usd(rail.max_amount)}</strong></div>
+                      <div className="flex items-center justify-between">
+                        <span>⏱ <strong>{rail.estimated_time}</strong></span>
+                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${rail.fee_percent === 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}`}>
+                          {rail.fee_percent === 0 ? 'FREE' : `${rail.fee_percent}% fee`}
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Currency selector for selected rail */}
+            {gatewayInfo.payment_rails[selectedRail]?.currencies.length > 1 && (
+              <div className="mt-4 flex items-center gap-3">
+                <span className="text-xs font-bold text-slate-500">Currency:</span>
+                <div className="flex gap-2">
+                  {gatewayInfo.payment_rails[selectedRail].currencies.map(cur => (
+                    <button key={cur} onClick={() => setSelectedCurrency(cur)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${selectedCurrency === cur ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}>
+                      {cur}
+                    </button>
+                  ))}
                 </div>
-              ))}
+              </div>
+            )}
+
+            {/* Active rail summary */}
+            <div className="mt-4 bg-slate-50 rounded-xl px-4 py-3 border border-slate-100 flex items-center justify-between text-xs">
+              <span className="text-slate-500">Active: <strong className="text-slate-800">{gatewayInfo.payment_rails[selectedRail]?.name}</strong> in <strong className="text-purple-700">{selectedCurrency}</strong></span>
+              <span className="text-slate-400">Settlement: <strong>{gatewayInfo.payment_rails[selectedRail]?.estimated_time}</strong></span>
             </div>
           </div>
 
