@@ -1,0 +1,19 @@
+ArcTreasury Copilot is an AI-powered treasury operations platform that automates USDC payouts across multiple blockchains using Circle's developer tools and Arc Testnet.
+
+Today's treasury teams face a real problem. Moving USDC globally is manual, slow, and error-prone. There are no built-in risk controls, idle funds earn zero yield, and cross-chain movement requires juggling multiple tools. We built ArcTreasury Copilot to solve all of this in one unified system.
+
+Let's start with the policy engine. Every payout goes through five rules before it moves a single dollar. First, we check the amount against configurable limits. Then we validate the destination chain is supported. Next, we score the recipient address against blocklists and known-good registries. We run a velocity check to flag unusual payout frequency. And finally, we detect duplicate recipients within the same batch. Each rule contributes a weighted risk score from zero to one hundred, which maps to one of five decisions: Approved, Queued, Review, Held, or Rejected. Every single decision is logged to a full audit trail.
+
+Now here's where it gets powerful. Our Treasury Copilot Agent runs autonomously in the background. It creates batches, runs the policy engine, auto-approves items based on your chosen strategy, and executes payouts, all without human intervention. You can choose from three strategies. Conservative mode only auto-approves low-risk queued items. Balanced mode handles both queued and review items under a risk threshold of fifty. Aggressive mode auto-approves nearly everything, including held items. There's also a one-click AutoPilot button that runs the entire pipeline end to end in about ten seconds.
+
+For multi-chain settlement, we implemented Circle's Cross-Chain Transfer Protocol V2. We support seven chains: Ethereum, Polygon, Arbitrum, Base, Avalanche, Solana, and Arc. That gives us forty-two directional bridge routes. Each cross-chain transfer follows the burn, attest, mint flow, and Arc-native routes get reduced fees.
+
+But what about idle USDC sitting in the treasury? That's where our RWA-backed reserves come in. We offer four tokenized asset classes. US Treasury Bills at five point two five percent APY. A USDC Money Market Fund at four point eight percent. Investment-grade corporate bonds at six point one percent. And a Tokenized Real Estate Fund at seven point five percent. The system continuously monitors treasury health across three dimensions: liquidity ratio, diversification index, and weighted yield, producing a composite letter grade that drives auto-rebalancing.
+
+For getting money in and out, Circle Gateway provides fiat on and off ramp functionality. We support Wire, ACH, and SEPA payment rails across four currencies: US Dollar, Euro, British Pound, and Singapore Dollar. Non-USD deposits are automatically converted through live FX rates before minting USDC, and the UI shows a real-time conversion preview.
+
+And this isn't just a prototype. We completed four real USDC transfers on Arc Testnet using Circle Programmable Wallets. A real wallet was funded, real transactions were executed, and real transaction hashes are verifiable on-chain. Every simulated element in the UI is clearly labeled so you always know what's real.
+
+The entire system runs on FastAPI with nine database tables, forty-three API endpoints, and a React frontend with seven pages. Every state transition, from batch creation to policy decisions to agent actions, is captured in a comprehensive audit log.
+
+ArcTreasury Copilot shows how on-chain infrastructure can power real-world financial operations today. Automated, compliant, and yield-generating. Thank you.
