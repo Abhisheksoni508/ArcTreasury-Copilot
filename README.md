@@ -8,7 +8,7 @@
 [![Demo Video](https://img.shields.io/badge/🎬_Demo_Video-Watch_on_Streamable-ff4444?style=for-the-badge)](https://streamable.com/nz2v36)
 [![Backend API](https://img.shields.io/badge/⚙️_Backend_API-Render-46E3B7?style=for-the-badge)](https://arctresury-api.onrender.com/api/health)
 
-**Built for the [$5K Build Global Payouts and Treasury Systems with USDC](https://arc.net) Bounty**
+**Built for the [$10K Build Global Payouts and Treasury Systems with USDC](https://arc.net) Bounty**
 
 Circle Programmable Wallets · Arc Testnet · CCTP V2 · Circle Gateway
 
