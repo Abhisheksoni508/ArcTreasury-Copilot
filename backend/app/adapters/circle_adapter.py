@@ -292,7 +292,8 @@ class CircleAdapter:
         Returns a list of wallet objects, each with ``id`` and ``address``.
         """
         if blockchains is None:
-            blockchains = ["ETH-SEPOLIA"] if self.base_url.endswith("sandbox.circle.com/v1/w3s") or "sandbox" in self.base_url else ["ETH"]
+            is_test = "sandbox" in self.base_url or (self.api_key and self.api_key.startswith("TEST_"))
+            blockchains = ["ETH-SEPOLIA"] if is_test else ["ETH"]
 
         entity_secret_ciphertext = await self._get_entity_secret_ciphertext()
         payload = {
@@ -310,7 +311,8 @@ class CircleAdapter:
                 json=payload,
                 timeout=30.0,
             )
-            resp.raise_for_status()
+            if not resp.is_success:
+                raise Exception(f"Circle API returned {resp.status_code}: {resp.text}")
             return resp.json().get("data", {}).get("wallets", [])
 
     async def list_wallets(self, wallet_set_id: str | None = None) -> list[dict]:
