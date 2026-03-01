@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: arctresury-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        value: sqlite+aiosqlite:///./arctresury.db
+      - key: DB_PATH
+        value: arctresury.db
+      - key: ADAPTER_MODE
+        value: circle
+      - key: CIRCLE_SANDBOX
+        value: "true"
+      - key: CIRCLE_API_KEY
+        value: TEST_API_KEY:6f0c815883467e8bbd1828fcb19cfc0f:b86840fc9782c0b6b96fb68aa47031c7
+      - key: CIRCLE_ENTITY_SECRET
+        value: 20190ba006404b3360b36a3af72fee8e26734b2b1a038affde01cf7103fc4381
+      - key: CIRCLE_WALLET_ID
+        value: e8fd7df0-1df7-5ded-82b4-089164d78e47
+      - key: ARC_API_KEY
+        value: TEST_API_KEY:8aa9387181a639e290f4c6ed8efce47d:47c8c150b05da1fcac94cc8df3342f3c
+      - key: ARC_CHAIN
+        value: ARC-TESTNET
+      - key: ARC_CCTP_DOMAIN
+        value: "26"
+      - key: ARC_SOURCE_WALLET
+        value: "0x0ebad37c010db50010fa779cc289382479859836"
+      - key: POLICY_MAX_AMOUNT
+        value: "25000"
+      - key: POLICY_VELOCITY_LIMIT
+        value: "5"
+      - key: TREASURY_WALLET
+        value: "0x0ebad37c010db50010fa779cc289382479859836"

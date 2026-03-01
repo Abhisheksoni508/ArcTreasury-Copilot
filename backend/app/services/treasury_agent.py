@@ -307,12 +307,22 @@ async def _run_policy_for_batch(db, batch_id: str, strategy_name: str):
     for item in items:
         item_id, addr, amount, chain, category = item[0], item[1], item[2], item[3], item[4]
 
+        # Query actual recent payout count for velocity check
+        vel_cursor = await db.execute(
+            """SELECT COUNT(*) FROM payout_items
+               WHERE recipient_address = ? AND decision = 'APPROVED'
+                 AND id != ? AND created_at >= datetime('now', '-30 days')""",
+            (addr, item_id),
+        )
+        recipient_recent_count = (await vel_cursor.fetchone())[0]
+
         decision_result = evaluate_item(
             recipient_address=addr,
             amount=amount,
             destination_chain=chain,
             category=category,
             batch_addresses=all_addresses,
+            recipient_recent_count=recipient_recent_count,
         )
 
         await db.execute(

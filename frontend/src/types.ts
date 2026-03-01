@@ -227,36 +227,50 @@ export interface RwaAsset {
 
 // ── Gateway Types ──────────────────────────────────────────────────────
 
+export interface GatewayChainInfo {
+  name: string;
+  chain_id: number;
+  testnet_chain_id: number;
+  testnet_name: string;
+  gateway_contract: string;
+  usdc_contract: string;
+  deposit_gas_estimate: string;
+  status: string;
+}
+
 export interface GatewayInfo {
   provider: string;
   description: string;
-  supported_currencies: string[];
-  payment_rails: Record<string, {
-    name: string;
-    currencies: string[];
-    min_amount: number;
-    max_amount: number;
-    estimated_time: string;
-    fee_percent: number;
-  }>;
-  fx_rates: Record<string, number>;
-  features: string[];
-  docs_url: string;
-  treasury_integration: {
-    on_ramp_flow: string[];
-    off_ramp_flow: string[];
+  product_url: string;
+  supported_chains: Record<string, GatewayChainInfo>;
+  chain_count: number;
+  key_features: string[];
+  transfer_flow: string[];
+  vs_cctp: {
+    cctp: string;
+    gateway: string;
+    recommendation: string;
   };
+}
+
+export interface GatewayBalance {
+  unified_balance_usdc: number;
+  deposits_by_chain: Record<string, number>;
+  available_to_mint: number;
+  chains_with_balance: string[];
+  total_chains: number;
 }
 
 export interface GatewayTransaction {
   id: string;
   type: string;
-  fiat_amount: number;
-  fiat_currency: string;
-  usdc_amount: number;
-  fee: number;
-  rail: string;
+  source_chain: string | null;
+  destination_chain: string | null;
+  amount_usdc: number;
+  fee_usdc: number;
   status: string;
+  tx_hash: string | null;
+  gateway_address: string | null;
   created_at: string;
   updated_at: string;
 }

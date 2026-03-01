@@ -55,9 +55,24 @@ CHAIN_MAP_PROD = {
 
 
 # Known USDC token addresses per blockchain (used in createTransaction API)
+# Testnet addresses for sandbox/testnet keys, mainnet addresses for production
 USDC_TOKEN_ADDRESS = {
-    "ARC-TESTNET": "0x3600000000000000000000000000000000000000",
-    # Add mainnet/other testnet token addresses as needed
+    # Testnets (used with TEST_API_KEY prefix)
+    "ARC-TESTNET":  "0x3600000000000000000000000000000000000000",
+    "ETH-SEPOLIA":  "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+    "MATIC-AMOY":   "0x41E94Eb71Ef8C9863E4b175a0e407e78FA0B6e99",
+    "ARB-SEPOLIA":  "0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d",
+    "SOL-DEVNET":   "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
+    "AVAX-FUJI":    "0x5425890298aed601595a70AB815c96711a31Bc65",
+    "BASE-SEPOLIA": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+    # Mainnet addresses
+    "ETH":   "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "MATIC": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
+    "ARB":   "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+    "SOL":   "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+    "AVAX":  "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+    "BASE":  "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "ARC":   "0x3600000000000000000000000000000000000000",
 }
 
 
@@ -78,7 +93,10 @@ class CircleAdapter:
         self.wallet_id = settings.CIRCLE_WALLET_ID
         self.wallet_address = settings.ARC_SOURCE_WALLET  # 0x address
         self.entity_secret = settings.CIRCLE_ENTITY_SECRET
-        self.blockchain = settings.ARC_CHAIN  # e.g. ARC-TESTNET
+        self.wallet_blockchain = settings.ARC_CHAIN  # blockchain our wallet lives on
+        # Resolve chain maps based on API key type
+        self._is_testnet = self.api_key.startswith("TEST_API_KEY:") if self.api_key else True
+        self._chain_map = CHAIN_MAP_SANDBOX if self._is_testnet else CHAIN_MAP_PROD
 
     @property
     def base_url(self) -> str:
@@ -159,8 +177,16 @@ class CircleAdapter:
                 is_simulated=False,
             )
 
-        # All transfers go through ARC-TESTNET (our wallet's blockchain)
-        blockchain = self.blockchain
+        # Resolve destination chain to Circle blockchain identifier
+        dest_chain_lower = destination_chain.lower()
+        resolved_blockchain = self._chain_map.get(dest_chain_lower, self.wallet_blockchain)
+
+        # Our wallet lives on wallet_blockchain — if destination differs, we still
+        # route the transfer on our wallet's chain.  True cross-chain would use
+        # CCTP Bridge Kit; here we execute on our wallet's chain and log the intent.
+        blockchain = self.wallet_blockchain
+        is_cross_chain = resolved_blockchain != self.wallet_blockchain
+
         token_address = USDC_TOKEN_ADDRESS.get(blockchain)
         if not token_address:
             return LegResult(

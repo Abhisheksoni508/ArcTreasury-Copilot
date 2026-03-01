@@ -15,9 +15,11 @@ ArcTreasury Copilot is a full-stack treasury operations system that:
 5. **One-click AutoPilot** — seed → policy → review → execute in a single button press
 6. **RWA-backed treasury** — allocate idle USDC to 4 tokenized asset classes (T-Bills, MMF, Corp Bonds, RE Fund)
 7. **CCTP V2 bridge routing** — 7 chains, 42 cross-chain routes with fee/time estimates
-8. **Circle Gateway** — fiat on/off ramp via Wire, ACH, SEPA rails
-9. **Full audit trails** — every state transition logged with timestamps
-10. **Clearly labels REAL vs SIMULATED** — honest transparency throughout the UI
+8. **Circle Gateway** — crosschain unified USDC balance (deposit on any chain, instant mint on another)
+9. **Bridge Kit integration** — TypeScript script for programmatic USDC bridging via CCTP
+10. **Full audit trails** — every state transition logged with timestamps
+11. **Dark mode** — ThemeToggle with Tailwind dark: variants throughout
+12. **Clearly labels REAL vs SIMULATED** — honest transparency throughout the UI
 
 ## Architecture
 
@@ -31,7 +33,8 @@ FastAPI (Python) + SQLite (9 tables, WAL mode)
   ├── Treasury Agent (3 strategies, autonomous loop)
   ├── RWA Treasury (4 asset classes, health scoring, auto-rebalance)
   ├── CCTP Bridge Router (7 chains, 42 routes)
-  └── Circle Gateway (fiat on/off ramp, 3 payment rails)
+  ├── Circle Gateway (crosschain unified USDC balance)
+  └── Bridge Kit (TypeScript CCTP V2 bridging script)
 ```
 
 ## Quick Start
@@ -57,7 +60,7 @@ Open: http://localhost:5173
 2. Go to **Batches** → click **AutoPilot** → watch one-click: seed 6 items → policy → auto-review → execute
 3. Open **Copilot Agent** → start with "balanced" strategy → watch autonomous loop
 4. Go to **Treasury & RWA** → Tab 1: seed RWA positions, allocate USDC to tokenized assets, view health score
-5. **Treasury & RWA** → Tab 2: Circle Gateway — create deposit/withdrawal intents
+5. **Treasury & RWA** → Tab 2: Circle Gateway — view unified crosschain balance, deposit USDC from Ethereum, mint on Arbitrum
 6. **Treasury & RWA** → Tab 3: CCTP Bridge — plan cross-chain route with fee breakdown
 7. **Execution Monitor** → retry failed items, inspect payout legs
 8. **Audit Log** → full history of every action
@@ -71,7 +74,7 @@ Open: http://localhost:5173
 | Agent-driven automation | Treasury Copilot Agent with 3 strategies + one-click AutoPilot |
 | Multi-recipient, multi-chain | 6+ recipients across ETH/Polygon/Arbitrum/Solana/Avalanche/Base/Arc with payout legs |
 | RWA-backed treasury | 4 tokenized assets (T-Bills, MMF, Corp Bonds, RE Fund), health scoring, auto-rebalance |
-| Circle Gateway | Fiat on/off ramp: Wire/ACH/SEPA, deposit + withdrawal intents, fee breakdown |
+| Circle Gateway | Crosschain unified USDC balance: deposit on 7 chains, instant mint on destination, unified balance UI |
 | CCTP Bridge | V2 domain registry (7 chains, 42 routes), route planner with burn→attest→mint steps |
 | Circle Wallets | Real USDC transfers on ARC-TESTNET via Circle Programmable Wallets |
 
@@ -103,16 +106,17 @@ The system defaults to mock mode for safe demo. Toggle to circle/arc mode in Set
 | **Agent** | `GET /api/agent/status`, `POST /api/agent/control`, `PUT /api/agent/strategy`, `GET /api/agent/activity`, `GET /api/agent/strategies` |
 | **Treasury (RWA)** | `GET /api/treasury/overview`, `GET /api/treasury/catalog`, `POST /api/treasury/allocate`, `POST /api/treasury/redeem/{id}`, `POST /api/treasury/rebalance`, `POST /api/treasury/seed` |
 | **CCTP Bridge** | `GET /api/bridge/domains`, `GET /api/bridge/routes`, `POST /api/bridge/plan`, `GET /api/bridge/transactions` |
-| **Circle Gateway** | `GET /api/gateway/info`, `POST /api/gateway/deposit`, `POST /api/gateway/withdraw`, `GET /api/gateway/transactions` |
+| **Circle Gateway** | `GET /api/gateway/info`, `GET /api/gateway/balance`, `POST /api/gateway/deposit`, `POST /api/gateway/mint`, `POST /api/gateway/transfer`, `GET /api/gateway/transactions` |
 | **Wallets** | `POST /api/wallets/setup`, `GET /api/wallets/balance` |
 | **Audit** | `GET /api/audit-logs` |
 
 ## Tech Stack
 
-- **Frontend**: React 18 + Vite 6 + TypeScript + Tailwind CSS + lucide-react
+- **Frontend**: React 18 + Vite 6 + TypeScript + Tailwind CSS + lucide-react + dark mode
 - **Backend**: FastAPI (Python 3.12) + SQLite (aiosqlite, WAL mode)
 - **Adapters**: Mock (deterministic) / Circle Programmable Wallets / Arc
 - **Circle SDK**: v10.1.0 for wallet creation scripts
+- **Bridge Kit**: TypeScript CCTP V2 bridging script
 - **No auth required** — demo-first design
 
 ## Environment Variables

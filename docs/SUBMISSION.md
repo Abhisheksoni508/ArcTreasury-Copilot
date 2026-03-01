@@ -2,7 +2,7 @@
 
 ## Judge-Facing Summary
 
-ArcTreasury Copilot is an AI-powered treasury operations platform that automates USDC payouts across multiple chains using Circle's Programmable Wallets and Arc Testnet. It combines a 5-rule policy engine, an autonomous Treasury Copilot Agent with 3 strategies, RWA-backed treasury reserves (4 tokenized asset classes), CCTP V2 cross-chain bridge routing (7 chains, 42 routes), and a Circle Gateway fiat on/off ramp — all with full audit trails and explicit REAL vs SIMULATED labeling.
+ArcTreasury Copilot is an AI-powered treasury operations platform that automates USDC payouts across multiple chains using Circle's Programmable Wallets and Arc Testnet. It combines a 5-rule policy engine, an autonomous Treasury Copilot Agent with 3 strategies, RWA-backed treasury reserves (4 tokenized asset classes), CCTP V2 cross-chain bridge routing (7 chains, 42 routes), Circle Gateway for crosschain unified USDC balance (deposit on any chain, instant mint on another), Bridge Kit integration for programmatic USDC bridging — all with full audit trails, dark mode support, and explicit REAL vs SIMULATED labeling.
 
 **Proven on-chain**: 4 real USDC transfers completed on ARC-TESTNET via Circle Programmable Wallets (wallet `0x0ebad37c...`, funded with 20 USDC, now depleted — proving real execution).
 
@@ -14,7 +14,7 @@ ArcTreasury Copilot is an AI-powered treasury operations platform that automates
 | Agent-driven automation | **STRONG** | Autonomous agent with 3 strategies (conservative/balanced/aggressive) + one-click AutoPilot |
 | Multi-recipient, multi-chain | **STRONG** | 6+ recipients across ETH/Polygon/Arbitrum/Solana/Avalanche/Base/Arc with payout legs |
 | RWA-backed treasury | **STRONG** | 4 tokenized assets (T-Bills 5.25%, MMF 4.8%, Corp Bonds 6.1%, RE Fund 7.5%), health scoring, auto-rebalance |
-| Circle Gateway | **COVERED** | Fiat on/off ramp: Wire/ACH/SEPA rails, USD/EUR/GBP/SGD, deposit + withdrawal intents |
+| Circle Gateway | **STRONG** | Crosschain unified USDC balance: deposit on any of 7 chains, instant mint on destination, unified balance tracking, Gateway wallet contracts |
 
 ## What Is Real vs Simulated
 
@@ -27,8 +27,9 @@ ArcTreasury Copilot is an AI-powered treasury operations platform that automates
 ### Simulated (demo-safe)
 - **Mock adapter** — deterministic outcomes (success, retry-then-success, permanent failure)
 - **RWA Treasury** — tokenized asset positions with yield accrual (no real RWA protocol integration)
+- **Circle Gateway** — crosschain unified USDC balance (deposit/mint/transfer tracked in DB, no real Gateway contract calls)
+- **Bridge Kit** — integration script demonstrates CCTP V2 burn-attest-mint flow (simulated, real pattern)
 - **CCTP Bridge** — route planning with fee/time estimates (no real CCTP burn/mint calls)
-- **Circle Gateway** — deposit/withdrawal intent flows (no real bank rail integration)
 - All simulated items clearly labeled with amber "SIMULATED" badge
 
 ## Technical Decisions
@@ -61,8 +62,8 @@ ArcTreasury Copilot is an AI-powered treasury operations platform that automates
 │                                                                │
 │  ┌────────────┐  ┌──────────────┐  ┌───────────────────────┐ │
 │  │  Treasury   │  │  CCTP Bridge │  │   Circle Gateway      │ │
-│  │  Agent      │  │  Router      │  │   (fiat on/off ramp)  │ │
-│  │  (3 strats) │  │  (7 chains)  │  │   Wire/ACH/SEPA      │ │
+│  │  Agent      │  │  Router      │  │   (crosschain USDC    │ │
+│  │  (3 strats) │  │  (7 chains)  │  │    unified balance)   │ │
 │  └────────────┘  └──────────────┘  └───────────────────────┘ │
 │                                                                │
 │  ┌────────────┐  ┌──────────────┐  ┌───────────────────────┐ │
@@ -81,7 +82,7 @@ ArcTreasury Copilot is an AI-powered treasury operations platform that automates
 | **Batches** | Create batches, seed demo data, run policy, execute, **AutoPilot one-click** (seed→policy→review→execute in sequence) |
 | **Execution** | Live execution monitor with retry, payout legs detail, REAL/SIMULATED badges |
 | **Copilot Agent** | Start/stop autonomous agent, pick strategy, view real-time activity log |
-| **Treasury & RWA** | 3-tab page: RWA positions + allocation, Circle Gateway deposits/withdrawals, CCTP bridge route planner |
+| **Treasury & RWA** | 3-tab page: RWA positions + allocation, Circle Gateway crosschain balance + deposit/mint/transfer, CCTP bridge route planner |
 | **Audit Log** | Full history of every state change with filters |
 | **Settings** | Adapter mode toggle (mock/circle/arc), policy thresholds, wallet config |
 
@@ -93,7 +94,7 @@ ArcTreasury Copilot is an AI-powered treasury operations platform that automates
 0:35 — Point out REAL vs SIMULATED badges. Switch to Arc adapter in Settings to show real on-chain capability.
 0:45 — **Copilot Agent** → Start agent with "balanced" strategy → watch it autonomously create batches, run policy, execute payouts in a loop.
 1:00 — **Treasury & RWA** → Tab 1: Show RWA positions (T-Bills, MMF, Corp Bonds, RE Fund). Click "Seed Demo" → allocate USDC to tokenized assets. Show health score with liquidity + diversification + yield composite.
-1:15 — **Treasury & RWA** → Tab 2: Circle Gateway — create a deposit intent (Wire, $50K USD). Show bank instructions and fee breakdown.
+1:15 — **Treasury & RWA** → Tab 2: Circle Gateway — view unified crosschain balance. Deposit 10K USDC from Ethereum. Mint 5K USDC on Arbitrum. Show quick crosschain transfer flow.
 1:25 — **Treasury & RWA** → Tab 3: CCTP Bridge — plan a route from Ethereum to Arc. Show burn→attest→mint steps with fee and time estimates across 7 chains.
 1:35 — **Execution Monitor** → show completed items, retry a failed one, inspect payout legs.
 1:45 — **Audit Log** → full trail of every action taken by the agent and manually.
@@ -121,7 +122,7 @@ ArcTreasury Copilot is an AI-powered treasury operations platform that automates
    7 chains with CCTP V2 domain IDs: Ethereum (0), Avalanche (1), Arbitrum (3), Base (6), Polygon (7), Solana (5), Arc (26). The route planner calculates burn→attest→mint steps with chain-specific fees and time estimates across 7 chains. Arc-native routes get reduced fees (0.01%).
 
 7. **How does Circle Gateway work?**
-   Fiat on/off ramp supporting Wire, ACH, and SEPA payment rails in USD, EUR, GBP, and SGD. Non-USD deposits are converted to USD via live FX rates (EUR×1.08, GBP×1.27, SGD×0.74) before minting USDC. The UI lets operators select a payment method and currency, see a live FX conversion preview, then create deposit intents (fiat→USD→USDC) or withdrawal intents (USDC→USD→fiat) with fee breakdown. Rail details: Wire ($100 min, 0.1% fee, 1-2 days), ACH ($10 min, free, 2-3 days), SEPA (€10 min, free, 1-2 days).
+   Circle Gateway provides a crosschain unified USDC balance across 7 supported blockchains (Ethereum, Arbitrum, Base, Polygon, Avalanche, Solana, Arc). Users deposit USDC to non-custodial Gateway wallet contracts on any source chain, building a unified balance. They can then instantly mint USDC on any destination chain from that balance — sub-second finality, no bridging delay. The UI shows deposit forms, mint forms, a quick crosschain transfer operation, and a supported chains grid with Gateway contract addresses. Compared to CCTP (which requires burn-attest-mint with ~60s delay), Gateway provides instant cross-chain availability via its pre-funded unified balance model.
 
 8. **What chains are supported for payouts?**
    Ethereum, Polygon, Arbitrum, Solana, Avalanche, Base, and Arc Testnet. The payout legs model supports direct transfers (same chain) and bridged transfers (cross-chain via CCTP routing).
@@ -160,4 +161,4 @@ ArcTreasury Copilot is an AI-powered treasury operations platform that automates
     The seed endpoint creates exactly 6 items with specific addresses that trigger specific policy decisions and mock adapter outcomes. Same seed = same demo every time. Treasury seed creates a fixed set of RWA positions.
 
 20. **What would you build next?**
-    WebSocket real-time updates, CSV/API batch upload, CCTP V2 live execution (actual burn/mint), Circle Mint integration for real Gateway flows, automated scheduling (cron-based payroll), natural-language copilot chat, and multi-tenant support with auth.
+    WebSocket real-time updates, CSV/API batch upload, CCTP V2 live execution (actual burn/mint via Bridge Kit SDK), real Gateway contract deposits on mainnet, automated scheduling (cron-based payroll), natural-language copilot chat, and multi-tenant support with auth.

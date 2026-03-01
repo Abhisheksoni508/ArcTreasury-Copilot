@@ -121,15 +121,15 @@ async def init_db():
         CREATE TABLE IF NOT EXISTS gateway_transactions (
             id TEXT PRIMARY KEY,
             type TEXT NOT NULL,
-            fiat_amount REAL,
-            fiat_currency TEXT,
-            usdc_amount REAL,
-            fee REAL,
-            rail TEXT,
+            source_chain TEXT,
+            destination_chain TEXT,
+            amount_usdc REAL NOT NULL,
+            fee_usdc REAL DEFAULT 0,
             status TEXT DEFAULT 'PENDING',
-            bank_instructions TEXT,
-            created_at TEXT,
-            updated_at TEXT
+            tx_hash TEXT,
+            gateway_address TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
         );
     """)
 

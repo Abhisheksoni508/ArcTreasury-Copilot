@@ -13,11 +13,11 @@ const PIE_COLORS = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#14b
 import {
   getTreasuryOverview, getRwaCatalog, allocateToRwa, redeemRwaPosition,
   triggerRebalance, seedTreasuryPositions,
-  getGatewayInfo, createDeposit, createWithdrawal, getGatewayTransactions,
+  getGatewayInfo, getGatewayBalance, gatewayDeposit, gatewayMint, gatewayTransfer, getGatewayTransactions,
   getBridgeDomains, getBridgeRoutes, planBridgeRoute,
 } from '../api';
 import type {
-  TreasuryOverview, RwaAsset, GatewayInfo, GatewayTransaction,
+  TreasuryOverview, RwaAsset, GatewayInfo, GatewayBalance, GatewayTransaction,
   CctpDomains, BridgeRoute, BridgePlan,
 } from '../types';
 
@@ -57,12 +57,16 @@ export default function TreasuryPage() {
 
   // Gateway state
   const [gatewayInfo, setGatewayInfo] = useState<GatewayInfo | null>(null);
+  const [gwBalance, setGwBalance] = useState<GatewayBalance | null>(null);
   const [gatewayTxns, setGatewayTxns] = useState<GatewayTransaction[]>([]);
-  const [depositAmt, setDepositAmt] = useState('');
-  const [withdrawAmt, setWithdrawAmt] = useState('');
+  const [gwDepositChain, setGwDepositChain] = useState('ethereum');
+  const [gwDepositAmt, setGwDepositAmt] = useState('');
+  const [gwMintChain, setGwMintChain] = useState('arbitrum');
+  const [gwMintAmt, setGwMintAmt] = useState('');
+  const [gwXferSrc, setGwXferSrc] = useState('ethereum');
+  const [gwXferDst, setGwXferDst] = useState('solana');
+  const [gwXferAmt, setGwXferAmt] = useState('');
   const [gwLoading, setGwLoading] = useState(false);
-  const [selectedRail, setSelectedRail] = useState('wire');
-  const [selectedCurrency, setSelectedCurrency] = useState('USD');
 
   // Bridge state
   const [domains, setDomains] = useState<CctpDomains | null>(null);
@@ -79,10 +83,11 @@ export default function TreasuryPage() {
     if (showLoader) setLoading(true);
     setError('');
     try {
-      const [ov, cat, gwInfo, gwTxns, dom, rts] = await Promise.all([
+      const [ov, cat, gwInfo, gwBal, gwTxns, dom, rts] = await Promise.all([
         getTreasuryOverview(),
         getRwaCatalog(),
         getGatewayInfo(),
+        getGatewayBalance(),
         getGatewayTransactions(),
         getBridgeDomains(),
         getBridgeRoutes(),
@@ -90,6 +95,7 @@ export default function TreasuryPage() {
       setOverview(ov);
       setCatalog(cat);
       setGatewayInfo(gwInfo);
+      setGwBalance(gwBal);
       setGatewayTxns(gwTxns);
       setDomains(dom);
       setRoutes(rts);
@@ -143,25 +149,35 @@ export default function TreasuryPage() {
     catch (e: unknown) { setError(e instanceof Error ? e.message : 'Seed failed'); }
   };
 
-  const handleDeposit = async () => {
-    if (!depositAmt) return;
+  const handleGwDeposit = async () => {
+    if (!gwDepositAmt) return;
     setGwLoading(true);
-    try { await createDeposit(parseFloat(depositAmt), selectedCurrency, selectedRail); setDepositAmt(''); await fetchAll(false); }
+    try { await gatewayDeposit(gwDepositChain, parseFloat(gwDepositAmt)); setGwDepositAmt(''); await fetchAll(false); }
     catch (e: unknown) { setError(e instanceof Error ? e.message : 'Deposit failed'); }
     finally { setGwLoading(false); }
   };
 
-  const handleWithdraw = async () => {
-    if (!withdrawAmt) return;
+  const handleGwMint = async () => {
+    if (!gwMintAmt) return;
     setGwLoading(true);
-    try { await createWithdrawal(parseFloat(withdrawAmt), selectedCurrency, selectedRail); setWithdrawAmt(''); await fetchAll(false); }
-    catch (e: unknown) { setError(e instanceof Error ? e.message : 'Withdrawal failed'); }
+    try { await gatewayMint(gwMintChain, parseFloat(gwMintAmt)); setGwMintAmt(''); await fetchAll(false); }
+    catch (e: unknown) { setError(e instanceof Error ? e.message : 'Mint failed'); }
+    finally { setGwLoading(false); }
+  };
+
+  const handleGwTransfer = async () => {
+    if (!gwXferAmt) return;
+    setGwLoading(true);
+    try { await gatewayTransfer(gwXferSrc, gwXferDst, parseFloat(gwXferAmt)); setGwXferAmt(''); await fetchAll(false); }
+    catch (e: unknown) { setError(e instanceof Error ? e.message : 'Transfer failed'); }
     finally { setGwLoading(false); }
   };
 
   const handlePlanRoute = async () => {
-    const plan = await planBridgeRoute(bridgeSrc, bridgeDst, parseFloat(bridgeAmt));
-    setBridgePlan(plan);
+    try {
+      const plan = await planBridgeRoute(bridgeSrc, bridgeDst, parseFloat(bridgeAmt));
+      setBridgePlan(plan);
+    } catch (e: unknown) { setError(e instanceof Error ? e.message : 'Route planning failed'); }
   };
 
   if (loading) return (
@@ -178,7 +194,7 @@ export default function TreasuryPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">Treasury & RWA</h2>
-          <p className="text-slate-500 mt-1 font-medium">RWA-backed reserves, Circle Gateway fiat ramps, and CCTP bridge routing</p>
+          <p className="text-slate-500 mt-1 font-medium">RWA-backed reserves, Circle Gateway crosschain balance, and CCTP bridge routing</p>
         </div>
         <div className="flex gap-2">
           <button onClick={handleSeed} className="px-4 py-2 bg-purple-100 text-purple-700 rounded-xl text-sm font-bold hover:bg-purple-200 transition-colors border border-purple-200">
@@ -462,116 +478,213 @@ export default function TreasuryPage() {
       {/* ═══════════════════ GATEWAY TAB ═══════════════════ */}
       {tab === 'gateway' && gatewayInfo && (
         <>
+          {/* Gateway Header + Unified Balance */}
           <div className="bg-white/60 backdrop-blur rounded-2xl p-6 border border-white shadow-sm">
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-3 mb-5">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-2xl shadow-lg"><ArrowRightLeft size={28} className="text-white" /></div>
               <div>
                 <h3 className="font-extrabold text-lg text-slate-900">{gatewayInfo.provider}</h3>
                 <p className="text-sm text-slate-500">{gatewayInfo.description}</p>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-6">
-              {/* On-ramp Flow */}
-              <div className="bg-emerald-50/50 rounded-xl p-4 border border-emerald-200">
-                <h4 className="font-bold text-emerald-800 mb-3"><span className="flex items-center gap-2"><Banknote size={16} /> Fiat → USDC (On-Ramp)</span></h4>
-                <ol className="space-y-2 text-sm text-emerald-700">
-                  {gatewayInfo.treasury_integration.on_ramp_flow.map((step, i) => (
-                    <li key={i} className="flex gap-2"><span className="text-emerald-400 font-mono text-xs mt-0.5">{step.slice(0, 2)}</span>{step.slice(3)}</li>
-                  ))}
-                </ol>
-                <div className="mt-4 space-y-2">
-                  <div className="flex gap-2">
-                    <input type="number" value={depositAmt} onChange={e => setDepositAmt(e.target.value)}
-                      placeholder={`${selectedCurrency} amount`} className="flex-1 px-3 py-2 rounded-lg border border-emerald-200 text-sm bg-white" />
-                    <button onClick={handleDeposit} disabled={gwLoading}
-                      className="px-4 py-2 bg-emerald-600 text-white rounded-lg font-bold text-sm hover:bg-emerald-700 disabled:opacity-50">
-                      {gwLoading ? '...' : 'Deposit'}
-                    </button>
-                  </div>
-                  {depositAmt && selectedCurrency !== 'USD' && (
-                    <div className="text-xs text-emerald-600 bg-emerald-100/60 rounded-lg px-3 py-1.5 border border-emerald-200">
-                      {selectedCurrency} {parseFloat(depositAmt).toLocaleString()} × {gatewayInfo.fx_rates?.[selectedCurrency] ?? 1} = <strong>${(parseFloat(depositAmt) * (gatewayInfo.fx_rates?.[selectedCurrency] ?? 1)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC</strong>
-                    </div>
-                  )}
-                </div>
-              </div>
-              {/* Off-ramp Flow */}
-              <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-200">
-                <h4 className="font-bold text-blue-800 mb-3"><span className="flex items-center gap-2"><Landmark size={16} /> USDC → Fiat (Off-Ramp)</span></h4>
-                <ol className="space-y-2 text-sm text-blue-700">
-                  {gatewayInfo.treasury_integration.off_ramp_flow.map((step, i) => (
-                    <li key={i} className="flex gap-2"><span className="text-blue-400 font-mono text-xs mt-0.5">{step.slice(0, 2)}</span>{step.slice(3)}</li>
-                  ))}
-                </ol>
-                <div className="mt-4 space-y-2">
-                  <div className="flex gap-2">
-                    <input type="number" value={withdrawAmt} onChange={e => setWithdrawAmt(e.target.value)}
-                      placeholder="USDC amount" className="flex-1 px-3 py-2 rounded-lg border border-blue-200 text-sm bg-white" />
-                    <button onClick={handleWithdraw} disabled={gwLoading}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold text-sm hover:bg-blue-700 disabled:opacity-50">
-                      {gwLoading ? '...' : 'Withdraw'}
-                    </button>
-                  </div>
-                  {withdrawAmt && selectedCurrency !== 'USD' && (
-                    <div className="text-xs text-blue-600 bg-blue-100/60 rounded-lg px-3 py-1.5 border border-blue-200">
-                      ${parseFloat(withdrawAmt).toLocaleString()} USDC ÷ {gatewayInfo.fx_rates?.[selectedCurrency] ?? 1} = <strong>{selectedCurrency} {(parseFloat(withdrawAmt) / (gatewayInfo.fx_rates?.[selectedCurrency] ?? 1)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
 
-          {/* Payment Rails Selection */}
-          <div className="bg-white/60 backdrop-blur rounded-2xl p-5 border border-white shadow-sm">
-            <h3 className="font-extrabold text-slate-900 mb-4"><span className="flex items-center gap-2"><Radio size={20} /> Select Payment Method</span></h3>
-            <div className="grid grid-cols-3 gap-4">
-              {Object.entries(gatewayInfo.payment_rails).map(([key, rail]) => {
-                const isActive = selectedRail === key;
-                return (
-                  <button key={key} onClick={() => { setSelectedRail(key); setSelectedCurrency(rail.currencies[0]); }}
-                    className={`text-left rounded-xl p-4 border-2 transition-all ${isActive ? 'border-purple-400 bg-purple-50/50 shadow-md shadow-purple-100' : 'border-slate-100 bg-gradient-to-br from-slate-50 to-white hover:border-slate-300'}`}>
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className={`font-bold ${isActive ? 'text-purple-800' : 'text-slate-800'}`}>{rail.name}</h4>
-                      {isActive && <span className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-pulse" />}
+            {/* Unified Balance Card */}
+            {gwBalance && (
+              <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-5 border border-blue-200 mb-5">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <span className="text-xs font-bold text-blue-500 uppercase tracking-wider">Unified Crosschain Balance</span>
+                    <div className="text-3xl font-black text-slate-900 mt-1">
+                      <AnimatedNumber value={usd(gwBalance.unified_balance_usdc)} />
                     </div>
-                    <div className="space-y-1 text-xs text-slate-500">
-                      <div className="flex items-center gap-1.5">
-                        <Globe size={12} className="text-slate-400" />
-                        <span>Currencies: <strong className={isActive ? 'text-purple-700' : ''}>{rail.currencies.join(', ')}</strong></span>
-                      </div>
-                      <div>Min: <strong>{usd(rail.min_amount)}</strong> · Max: <strong>{usd(rail.max_amount)}</strong></div>
-                      <div className="flex items-center justify-between">
-                        <span>⏱ <strong>{rail.estimated_time}</strong></span>
-                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${rail.fee_percent === 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}`}>
-                          {rail.fee_percent === 0 ? 'FREE' : `${rail.fee_percent}% fee`}
-                        </span>
-                      </div>
+                    <span className="text-xs text-slate-500">
+                      Available to mint: <strong className="text-cyan-600">{usd(gwBalance.available_to_mint)}</strong> across {gwBalance.total_chains} chains
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs font-bold text-slate-500 block mb-2">Deposits by Chain</span>
+                    <div className="space-y-1">
+                      {Object.entries(gwBalance.deposits_by_chain).filter(([, v]) => v > 0).map(([chain, amt]) => (
+                        <div key={chain} className="flex items-center gap-2 justify-end">
+                          <span className="text-xs text-slate-500 capitalize">{chain}</span>
+                          <span className="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-lg">{usd(amt)}</span>
+                        </div>
+                      ))}
+                      {gwBalance.chains_with_balance.length === 0 && (
+                        <span className="text-xs text-slate-400">No deposits yet</span>
+                      )}
                     </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Currency selector for selected rail */}
-            {gatewayInfo.payment_rails[selectedRail]?.currencies.length > 1 && (
-              <div className="mt-4 flex items-center gap-3">
-                <span className="text-xs font-bold text-slate-500">Currency:</span>
-                <div className="flex gap-2">
-                  {gatewayInfo.payment_rails[selectedRail].currencies.map(cur => (
-                    <button key={cur} onClick={() => setSelectedCurrency(cur)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${selectedCurrency === cur ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}>
-                      {cur}
-                    </button>
-                  ))}
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* Active rail summary */}
-            <div className="mt-4 bg-slate-50 rounded-xl px-4 py-3 border border-slate-100 flex items-center justify-between text-xs">
-              <span className="text-slate-500">Active: <strong className="text-slate-800">{gatewayInfo.payment_rails[selectedRail]?.name}</strong> in <strong className="text-purple-700">{selectedCurrency}</strong></span>
-              <span className="text-slate-400">Settlement: <strong>{gatewayInfo.payment_rails[selectedRail]?.estimated_time}</strong></span>
+            {/* Key Features */}
+            <div className="grid grid-cols-4 gap-3">
+              {gatewayInfo.key_features.map((feat, i) => (
+                <div key={i} className="bg-white rounded-xl p-3 border border-slate-100 text-center">
+                  <span className="text-xs font-medium text-slate-600">{feat}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Deposit + Mint Forms */}
+          <div className="grid grid-cols-2 gap-6">
+            {/* Deposit to Gateway */}
+            <div className="bg-emerald-50/50 backdrop-blur rounded-2xl p-5 border border-emerald-200 shadow-sm">
+              <h4 className="font-bold text-emerald-800 mb-3"><span className="flex items-center gap-2"><ArrowDown size={16} /> Deposit USDC to Gateway</span></h4>
+              <p className="text-xs text-emerald-600 mb-4">
+                Send USDC to a non-custodial Gateway wallet contract on any supported source chain. Your deposit increases your unified crosschain balance.
+              </p>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-bold text-emerald-700 mb-1 block">Source Chain</label>
+                  <select value={gwDepositChain} onChange={e => setGwDepositChain(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-emerald-200 text-sm font-medium bg-white capitalize">
+                    {gatewayInfo.supported_chains && Object.keys(gatewayInfo.supported_chains).map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex gap-2">
+                  <input type="number" value={gwDepositAmt} onChange={e => setGwDepositAmt(e.target.value)}
+                    placeholder="USDC amount" className="flex-1 px-3 py-2 rounded-xl border border-emerald-200 text-sm bg-white" />
+                  <button onClick={handleGwDeposit} disabled={gwLoading}
+                    className="px-5 py-2 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:bg-emerald-700 disabled:opacity-50 transition-colors">
+                    {gwLoading ? '...' : 'Deposit'}
+                  </button>
+                </div>
+                {gwDepositChain && gatewayInfo.supported_chains?.[gwDepositChain] && (
+                  <div className="text-xs text-emerald-500 bg-emerald-100/60 rounded-lg px-3 py-1.5 border border-emerald-200">
+                    Gateway: <code className="font-mono text-[10px]">{gatewayInfo.supported_chains[gwDepositChain].gateway_contract}</code> · Gas: ~{gatewayInfo.supported_chains[gwDepositChain].deposit_gas_estimate}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Mint from Gateway */}
+            <div className="bg-blue-50/50 backdrop-blur rounded-2xl p-5 border border-blue-200 shadow-sm">
+              <h4 className="font-bold text-blue-800 mb-3"><span className="flex items-center gap-2"><ArrowUp size={16} /> Mint USDC from Gateway</span></h4>
+              <p className="text-xs text-blue-600 mb-4">
+                Instantly mint USDC on any destination chain from your unified Gateway balance. Sub-second finality — no bridging delay.
+              </p>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-bold text-blue-700 mb-1 block">Destination Chain</label>
+                  <select value={gwMintChain} onChange={e => setGwMintChain(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-blue-200 text-sm font-medium bg-white capitalize">
+                    {gatewayInfo.supported_chains && Object.keys(gatewayInfo.supported_chains).map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex gap-2">
+                  <input type="number" value={gwMintAmt} onChange={e => setGwMintAmt(e.target.value)}
+                    placeholder="USDC amount" className="flex-1 px-3 py-2 rounded-xl border border-blue-200 text-sm bg-white" />
+                  <button onClick={handleGwMint} disabled={gwLoading}
+                    className="px-5 py-2 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 disabled:opacity-50 transition-colors">
+                    {gwLoading ? '...' : 'Mint'}
+                  </button>
+                </div>
+                {gwBalance && (
+                  <div className="text-xs text-blue-500 bg-blue-100/60 rounded-lg px-3 py-1.5 border border-blue-200">
+                    Available to mint: <strong>{usd(gwBalance.available_to_mint)}</strong>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Crosschain Transfer */}
+          <div className="bg-gradient-to-r from-purple-50/50 to-indigo-50/50 backdrop-blur rounded-2xl p-5 border border-purple-200 shadow-sm">
+            <h4 className="font-bold text-purple-800 mb-3"><span className="flex items-center gap-2"><Shuffle size={16} /> Quick Crosschain Transfer</span></h4>
+            <p className="text-xs text-purple-600 mb-4">
+              Deposit on source chain + instant mint on destination chain in a single operation. Uses Circle Gateway's unified balance.
+            </p>
+            <div className="flex gap-3 items-end">
+              <div>
+                <label className="text-xs font-bold text-purple-700 mb-1 block">From</label>
+                <select value={gwXferSrc} onChange={e => setGwXferSrc(e.target.value)}
+                  className="px-3 py-2 rounded-xl border border-purple-200 text-sm font-medium bg-white capitalize">
+                  {gatewayInfo.supported_chains && Object.keys(gatewayInfo.supported_chains).map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+              <span className="text-2xl pb-1 text-purple-400">→</span>
+              <div>
+                <label className="text-xs font-bold text-purple-700 mb-1 block">To</label>
+                <select value={gwXferDst} onChange={e => setGwXferDst(e.target.value)}
+                  className="px-3 py-2 rounded-xl border border-purple-200 text-sm font-medium bg-white capitalize">
+                  {gatewayInfo.supported_chains && Object.keys(gatewayInfo.supported_chains).map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-bold text-purple-700 mb-1 block">USDC</label>
+                <input type="number" value={gwXferAmt} onChange={e => setGwXferAmt(e.target.value)}
+                  placeholder="Amount" className="px-3 py-2 rounded-xl border border-purple-200 text-sm font-medium w-32 bg-white" />
+              </div>
+              <button onClick={handleGwTransfer} disabled={gwLoading}
+                className="px-5 py-2 bg-purple-600 text-white rounded-xl font-bold text-sm hover:bg-purple-700 disabled:opacity-50 transition-colors">
+                {gwLoading ? '...' : 'Transfer'}
+              </button>
+            </div>
+          </div>
+
+          {/* Transfer Flow Explainer */}
+          <div className="bg-white/60 backdrop-blur rounded-2xl p-5 border border-white shadow-sm">
+            <h4 className="font-bold text-slate-800 mb-4"><span className="flex items-center gap-2"><Zap size={16} /> How Gateway Transfers Work</span></h4>
+            <div className="flex items-center gap-3">
+              {gatewayInfo.transfer_flow.map((step, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  {i > 0 && <span className="text-slate-300">→</span>}
+                  <div className={`rounded-xl px-4 py-3 text-center border ${i === 0 ? 'bg-emerald-50 border-emerald-200' : i === 1 ? 'bg-blue-50 border-blue-200' : 'bg-purple-50 border-purple-200'}`}>
+                    <div className="font-bold text-xs text-slate-700">{step}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {gatewayInfo.vs_cctp && (
+              <div className="mt-4 grid grid-cols-3 gap-3 text-xs">
+                <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                  <span className="font-bold text-slate-600 block mb-1">CCTP (Direct Bridge)</span>
+                  <span className="text-slate-500">{gatewayInfo.vs_cctp.cctp}</span>
+                </div>
+                <div className="bg-blue-50 rounded-xl p-3 border border-blue-200">
+                  <span className="font-bold text-blue-700 block mb-1">Gateway (Unified Balance)</span>
+                  <span className="text-blue-600">{gatewayInfo.vs_cctp.gateway}</span>
+                </div>
+                <div className="bg-purple-50 rounded-xl p-3 border border-purple-200">
+                  <span className="font-bold text-purple-700 block mb-1">Recommendation</span>
+                  <span className="text-purple-600">{gatewayInfo.vs_cctp.recommendation}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Supported Chains Grid */}
+          <div className="bg-white/60 backdrop-blur rounded-2xl p-5 border border-white shadow-sm">
+            <h3 className="font-extrabold text-slate-900 mb-4"><span className="flex items-center gap-2"><Globe size={20} /> Supported Chains ({gatewayInfo.chain_count})</span></h3>
+            <div className="grid grid-cols-7 gap-3">
+              {gatewayInfo.supported_chains && Object.entries(gatewayInfo.supported_chains).map(([chain, info]) => (
+                <div key={chain} className={`rounded-xl p-3 border text-center transition-all ${chain === 'arc' ? 'bg-purple-50 border-purple-300 ring-2 ring-purple-200' : 'bg-slate-50 border-slate-200'}`}>
+                  <div className="flex justify-center mb-2">
+                    {chain === 'arc' ? <Hexagon size={24} className="text-purple-600" /> :
+                      chain === 'ethereum' ? <Diamond size={24} className="text-blue-500" /> :
+                        chain === 'polygon' ? <Circle size={24} className="text-purple-500" /> :
+                          chain === 'solana' ? <Disc size={24} className="text-green-500" /> :
+                            chain === 'arbitrum' ? <Circle size={24} className="text-blue-500" /> :
+                              chain === 'base' ? <div className="rotate-45"><Square size={24} className="text-blue-600" /></div> :
+                                <Triangle size={24} className="text-red-500" />}
+                  </div>
+                  <div className="font-bold text-sm capitalize text-slate-800">{chain}</div>
+                  <div className="text-[10px] text-slate-400 mt-1">{info.status}</div>
+                  <div className="text-[10px] text-slate-400">Gas: ~{info.deposit_gas_estimate}</div>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -583,44 +696,40 @@ export default function TreasuryPage() {
                 <thead>
                   <tr className="text-left text-xs text-slate-400 border-b border-slate-100">
                     <th className="pb-2 font-semibold">Type</th>
-                    <th className="pb-2 font-semibold">Fiat</th>
-                    <th className="pb-2 font-semibold">FX → USD</th>
-                    <th className="pb-2 font-semibold">USDC</th>
-                    <th className="pb-2 font-semibold">Rail</th>
+                    <th className="pb-2 font-semibold">Source</th>
+                    <th className="pb-2 font-semibold">Destination</th>
+                    <th className="pb-2 font-semibold">Amount</th>
+                    <th className="pb-2 font-semibold">Fee</th>
                     <th className="pb-2 font-semibold">Status</th>
                     <th className="pb-2 font-semibold">Time</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {gatewayTxns.map(tx => {
-                    const fxRate = gatewayInfo?.fx_rates?.[tx.fiat_currency] ?? 1;
-                    const isNonUsd = tx.fiat_currency !== 'USD';
-                    return (
-                      <tr key={tx.id} className="border-b border-slate-50">
-                        <td className="py-2">
-                          <span className={`px-2 py-1 rounded-lg text-xs font-bold ${tx.type === 'DEPOSIT' ? 'bg-emerald-50 text-emerald-700' : 'bg-blue-50 text-blue-700'}`}>
-                            {tx.type === 'DEPOSIT' ? <span className="flex items-center gap-1"><ArrowDown size={14} /> Deposit</span> : <span className="flex items-center gap-1"><ArrowUp size={14} /> Withdraw</span>}
-                          </span>
-                        </td>
-                        <td className="py-2 font-bold">{tx.fiat_currency} {tx.fiat_amount.toLocaleString()}</td>
-                        <td className="py-2 text-xs">
-                          {isNonUsd ? (
-                            <span className="text-slate-500">×{fxRate} = <strong className="text-slate-700">${(tx.fiat_amount * fxRate).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></span>
-                          ) : (
-                            <span className="text-slate-300">—</span>
-                          )}
-                        </td>
-                        <td className="py-2 font-bold text-cyan-600">{tx.usdc_amount.toLocaleString()} USDC</td>
-                        <td className="py-2 capitalize">{tx.rail}</td>
-                        <td className="py-2">
-                          <span className={`px-2 py-1 rounded-lg text-xs font-bold ${tx.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
-                            {tx.status}
-                          </span>
-                        </td>
-                        <td className="py-2 text-slate-400 text-xs">{new Date(tx.created_at).toLocaleString()}</td>
-                      </tr>
-                    );
-                  })}
+                  {gatewayTxns.map(tx => (
+                    <tr key={tx.id} className="border-b border-slate-50">
+                      <td className="py-2">
+                        <span className={`px-2 py-1 rounded-lg text-xs font-bold ${
+                          tx.type === 'DEPOSIT' ? 'bg-emerald-50 text-emerald-700' :
+                          tx.type === 'MINT' ? 'bg-blue-50 text-blue-700' :
+                          'bg-purple-50 text-purple-700'
+                        }`}>
+                          {tx.type === 'DEPOSIT' ? <span className="flex items-center gap-1"><ArrowDown size={14} /> Deposit</span> :
+                           tx.type === 'MINT' ? <span className="flex items-center gap-1"><ArrowUp size={14} /> Mint</span> :
+                           <span className="flex items-center gap-1"><Shuffle size={14} /> Transfer</span>}
+                        </span>
+                      </td>
+                      <td className="py-2 font-medium capitalize text-slate-700">{tx.source_chain || '—'}</td>
+                      <td className="py-2 font-medium capitalize text-slate-700">{tx.destination_chain || '—'}</td>
+                      <td className="py-2 font-bold text-cyan-600">{usd(tx.amount_usdc)}</td>
+                      <td className="py-2 text-xs text-slate-500">{tx.fee_usdc > 0 ? `${tx.fee_usdc} USDC` : 'Free'}</td>
+                      <td className="py-2">
+                        <span className={`px-2 py-1 rounded-lg text-xs font-bold ${tx.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
+                          {tx.status}
+                        </span>
+                      </td>
+                      <td className="py-2 text-slate-400 text-xs">{new Date(tx.created_at).toLocaleString()}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>

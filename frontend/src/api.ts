@@ -8,7 +8,7 @@ import type {
   PolicyRunResponse, ExecutionResponse, SeedResponse,
   HealthResponse, Settings, WalletSetupResponse, WalletBalanceResponse,
   AgentStatus, AgentActivity, AgentStrategyInfo,
-  TreasuryOverview, RwaAsset, GatewayInfo, GatewayTransaction,
+  TreasuryOverview, RwaAsset, GatewayInfo, GatewayBalance, GatewayTransaction,
   CctpDomains, BridgeRoute, BridgePlan,
 } from './types';
 
@@ -109,12 +109,15 @@ export const redeemRwaPosition = (positionId: string) =>
 export const triggerRebalance = () => request<unknown>('/treasury/rebalance', { method: 'POST' });
 export const seedTreasuryPositions = () => request<unknown>('/treasury/seed', { method: 'POST' });
 
-// ── Circle Gateway ──────────────────────────────────────────────────────
+// ── Circle Gateway (crosschain unified USDC balance) ────────────────────
 export const getGatewayInfo = () => request<GatewayInfo>('/gateway/info');
-export const createDeposit = (amount: number, currency = 'USD', rail = 'wire') =>
-  request<unknown>('/gateway/deposit', { method: 'POST', body: JSON.stringify({ amount, currency, rail }) });
-export const createWithdrawal = (amount_usdc: number, currency = 'USD', rail = 'wire') =>
-  request<unknown>('/gateway/withdraw', { method: 'POST', body: JSON.stringify({ amount_usdc, currency, rail }) });
+export const getGatewayBalance = () => request<GatewayBalance>('/gateway/balance');
+export const gatewayDeposit = (source_chain: string, amount_usdc: number) =>
+  request<unknown>('/gateway/deposit', { method: 'POST', body: JSON.stringify({ source_chain, amount_usdc }) });
+export const gatewayMint = (destination_chain: string, amount_usdc: number) =>
+  request<unknown>('/gateway/mint', { method: 'POST', body: JSON.stringify({ destination_chain, amount_usdc }) });
+export const gatewayTransfer = (source_chain: string, destination_chain: string, amount_usdc: number) =>
+  request<unknown>('/gateway/transfer', { method: 'POST', body: JSON.stringify({ source_chain, destination_chain, amount_usdc }) });
 export const getGatewayTransactions = () => request<GatewayTransaction[]>('/gateway/transactions');
 
 // ── CCTP Bridge ─────────────────────────────────────────────────────────
