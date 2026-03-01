@@ -51,7 +51,7 @@ RWA_CATALOG = {
         "apy": 4.80,
         "risk_rating": "AA+",
         "maturity_days": 1,  # instant redemption
-        "min_investment": 100.0,
+        "min_investment": 1.0,
         "issuer": "BlackRock Tokenized (via Circle)",
         "chain": "ARC-TESTNET",
         "description": "Tokenized money market fund denominated in USDC. Near-instant liquidity.",
@@ -403,11 +403,13 @@ async def auto_rebalance(db: aiosqlite.Connection) -> dict:
     # Over-liquid: allocate excess to RWAs
     if reserve_ratio > target + threshold:
         excess = overview["usdc_liquid"] - (overview["total_aum"] * target)
-        if excess > 100:  # Only rebalance if meaningful amount
-            # Pick highest-yield asset we can afford
-            best_asset = max(RWA_CATALOG.values(), key=lambda a: a["apy"])
+        if excess > 1.0:  # Only rebalance if meaningful amount
             amount = min(excess, overview["usdc_liquid"] * 0.5)  # Don't allocate more than 50% at once
-            if amount >= best_asset["min_investment"]:
+            
+            # Pick highest-yield asset we can afford
+            valid_assets = [a for a in RWA_CATALOG.values() if amount >= a["min_investment"]]
+            if valid_assets:
+                best_asset = max(valid_assets, key=lambda a: a["apy"])
                 result = await allocate_to_rwa(db, best_asset["symbol"], round(amount, 2))
                 actions.append({
                     "type": "ALLOCATE",
