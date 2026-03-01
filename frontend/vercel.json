@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://arctresury-api.onrender.com/api/:path*"
+    }
+  ]
+}
